@@ -1,0 +1,19 @@
+{
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "output": "chernovik.mp4",
+  "music": {"file": "music/track.mp3", "offset": 0.0, "gain_db": -3.0},
+  "shots": [
+    {"file": "gen/01.mp4", "in": 0.6, "out": 1.3, "label": "хук: первый кадр = превью"},
+    {"file": "gen/02.mp4", "in": 1.1, "out": 1.8, "label": "хук 2"},
+    {"file": "gen/03.mp4", "in": 0.4, "dur": 0.7, "label": "хук 3"},
+    {"file": "gen/04.mp4", "in": 1.2, "out": 3.2, "label": "завязка: выдох"},
+    {"file": "gen/05.mp4", "in": 0.5, "out": 1.5, "label": "развитие"},
+    {"file": "gen/06.mp4", "in": 0.8, "out": 1.8, "label": "развитие"},
+    {"file": "gen/07.mp4", "in": 0.6, "dur": 0.4, "label": "перебивка: деталь"},
+    {"file": "gen/08.mp4", "in": 1.0, "dur": 0.6, "speed": 2.0, "label": "разгон на дроп"},
+    {"file": "gen/09.mp4", "in": 0.7, "out": 2.1, "label": "дроп: главный кадр"},
+    {"file": "gen/10.mp4", "in": 0.9, "out": 3.1, "label": "посадка: лупится в кадр 1"}
+  ]
+}
