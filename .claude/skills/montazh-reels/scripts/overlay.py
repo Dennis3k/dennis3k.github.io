@@ -34,6 +34,9 @@ import tempfile
 
 from PIL import Image, ImageDraw, ImageFont
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import cards
+
 FONT = "/usr/share/fonts/opentype/inter/Inter-ExtraBold.otf"
 WHITE = (255, 255, 255, 255)
 ACCENT = (79, 140, 255, 255)
@@ -106,6 +109,10 @@ def build(spec, workdir):
                  f"1/{1 + hi:.3f}'")
     if sat != 1.0:
         base += f",eq=saturation={sat}"
+    light = spec.get("light") or []
+    if light:
+        terms = "+".join(f"(between(t,{a},{b})*{v})" for a, b, v in light)
+        base += f",eq=eval=frame:brightness='{terms}'"
     base += ",format=rgba[bg]"
     chain.append(base)
 
@@ -137,6 +144,33 @@ def build(spec, workdir):
                          f"enable='between(t,{a:.3f},{z:.3f})'{out}")
             cur = out
             idx += 1
+
+    for n, w in enumerate(spec.get("widgets", [])):
+        render = cards.RENDERERS.get(w["type"])
+        if render is None:
+            sys.exit(f"неизвестный виджет: {w['type']}")
+        t = float(w["t"])
+        dur = float(w["dur"])
+        frames = max(2, int(dur * fps))
+        wd = os.path.join(workdir, f"w{n}")
+        os.makedirs(wd, exist_ok=True)
+        size = None
+        for k in range(frames):
+            im = render(w, k / (frames - 1))
+            im.save(os.path.join(wd, f"{k:05d}.png"))
+            size = im.size
+        x = w.get("x")
+        y = w.get("y")
+        if x is None or y is None:
+            x, y = place(w.get("pos", "tr"), size[0], size[1], W, H)
+        inputs += ["-framerate", str(fps), "-start_number", "0",
+                   "-i", os.path.join(wd, "%05d.png")]
+        chain.append(f"[{idx}:v]setpts=PTS+{t}/TB[w{idx}]")
+        out = f"[v{idx}]"
+        chain.append(f"{cur}[w{idx}]overlay={x}:{y}:"
+                     f"enable='between(t,{t},{t + dur:.3f})'{out}")
+        cur = out
+        idx += 1
 
     if spec.get("badge"):
         img = draw_block([(spec["badge"], 0)], 30, W)
