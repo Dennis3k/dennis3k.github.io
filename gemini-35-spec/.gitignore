@@ -1,0 +1,5 @@
+node_modules
+out/stills/
+out/render_*.log
+# regenerated deterministically by tools/score.py in ~15 s
+out/*.wav

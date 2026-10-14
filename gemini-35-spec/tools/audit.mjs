@@ -1,0 +1,22 @@
+/* audit.mjs — print the word→frame table the picture is cut to */
+import { VO, CUTS, FPS, TOTAL, blurAt } from '../src/timing.js';
+const fr = (t) => Math.round(t * FPS);
+const rows = [];
+const push = (line, w, t, event) => rows.push({ line, word: w, t: t.toFixed(2), frame: fr(t), event });
+VO.l1.forEach((w) => push(1, w.w, w.t, 'word slams full-width'));
+push(2, 'Gemini', VO.gemini, 'sparkle window lands on the word');
+push(2, 'three', VO.three, 'glossy 3.5 crashes in');
+VO.l3.forEach((w) => push(3, w.w, w.t, 'greeting word resolves'));
+push(4, '(typing)', VO.typeStart, 'first character');
+push(4, '(typing)', VO.typeEnd, 'last character');
+VO.l5.forEach((w) => push(5, w.w, w.t, 'word slams / camera is on it'));
+push(6, 'Experience', VO.experience, 'headline in');
+push(6, 'Gemini.', VO.geminiWord, 'gradient wordmark in');
+console.log('| line | word | voice t | frame | picture event |');
+console.log('|---:|---|---:|---:|---|');
+for (const r of rows) console.log(`| ${r.line} | ${r.word} | ${r.t}s | ${r.frame} | ${r.event} |`);
+console.log('\n| scene | in | out | frames |');
+console.log('|---|---:|---:|---:|');
+for (const [k, [a, b]] of Object.entries(CUTS)) console.log(`| ${k} | ${a.toFixed(2)}s | ${b.toFixed(2)}s | ${fr(a)}–${fr(b) - 1} |`);
+let acc = 0; for (let f = 0; f < TOTAL; f++) acc += blurAt(f / FPS);
+console.log(`\ntotal frames ${TOTAL} · sub-frame renders ${acc} · mean ${(acc / TOTAL).toFixed(1)} samples/frame`);

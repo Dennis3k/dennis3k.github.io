@@ -1,0 +1,26 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Gemini 3.5 — spec build</title>
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block;width:100vw;height:auto}</style>
+</head><body>
+<canvas id="c"></canvas>
+<script type="module">
+import { Renderer, FPS, TOTAL } from './src/main.js';
+const q = new URLSearchParams(location.search);
+const W = +(q.get('w') || 1920), H = +(q.get('h') || 1080);
+const cv = document.getElementById('c');
+cv.width = W; cv.height = H;
+const ctx = cv.getContext('2d', { alpha: false });
+const R = new Renderer(W, H);
+window.__R = R; window.__ctx = ctx; window.__canvas = cv;
+window.__total = TOTAL; window.__fps = FPS;
+window.__subs = null;                 // override for stills
+window.__render = (t, sub) => R.frame(ctx, t, { sub: sub ?? window.__subs });
+window.__frame = (f) => { R.frame(ctx, f / FPS, { sub: window.__subs }); return cv.toDataURL('image/png'); };
+window.__at = (t, sub) => { R.frame(ctx, t, { sub }); return cv.toDataURL('image/png'); };
+await document.fonts.ready;
+// warm the font cache so the first frames measure identically
+const w1 = (() => { ctx.font = '400 100px "Inter Display"'; return ctx.measureText('Gemini').width; })();
+const w2 = (() => { ctx.font = '900 100px "Inter Display"'; return ctx.measureText('Gemini').width; })();
+window.__fontCheck = { w400: w1, w900: w2, weightsDiffer: Math.abs(w1 - w2) > 1 };
+window.__ready = true;
+</script></body></html>
