@@ -73,8 +73,22 @@ def draw_block(lines, size, width, align="left"):
     return img
 
 
+# Поля кадра. Для полноэкранного рилса сверху и снизу лежит интерфейс
+# платформы; для окна внутри раскладки «до/после» его нет, поля узкие.
+SAFE = {"x": 72, "top": 250, "bottom": 420}
+
+
+def set_safe(spec, H):
+    if spec.get("safe"):
+        SAFE.update(spec["safe"])
+    elif H < 1500:
+        SAFE.update({"x": 36, "top": int(H * 0.05), "bottom": int(H * 0.05)})
+    global MARGIN
+    MARGIN = SAFE["x"]
+
+
 def place(pos, bw, bh, W, H):
-    top, bottom = 250, H - 420
+    top, bottom = SAFE["top"], H - SAFE["bottom"]
     if pos == "tl":
         return MARGIN, top
     if pos == "tr":
@@ -138,6 +152,7 @@ def build(spec, workdir):
     W = int(spec.get("width", 1080))
     H = int(spec.get("height", 1920))
     fps = int(spec.get("fps", 30))
+    set_safe(spec, H)
     t0 = float(spec.get("in", 0.0))
     t1 = float(spec.get("out", 0.0)) or None
     g = spec.get("grade", {})
@@ -171,7 +186,8 @@ def build(spec, workdir):
     base = (f"{src_v}trim=start=" + ("0" if len(segs) > 1 else str(t0)) +
             (f":end={total if len(segs) > 1 else t1}" if t1 else "") +
             ",setpts=PTS-STARTPTS,"
-            f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
+            f"scale={W}:{H}:force_original_aspect_ratio=increase,"
+            f"crop={W}:{H}:(iw-{W})/2:(ih-{H})*{float(spec.get('crop_y', 0.5))},"
             f"fps={fps},setsar=1")
 
     punches = [(at(float(t)), float(sv)) for t, sv in spec.get("punch", [])]
@@ -212,7 +228,9 @@ def build(spec, workdir):
         b = at(float(sp["t"]) + float(sp["dur"]))
         if b - a < 0.4:
             continue
-        panel_h = int(sp.get("panel_h", 960))
+        orient = sp.get("orient", "v")          # v: видео сверху, h: панель слева
+        panel_h = int(sp.get("panel_h", H // 2))
+        panel_w = int(sp.get("panel_w", W // 2))
         top_h = H - panel_h
         crop_y = int(sp.get("crop_y", 180))
         sl = float(sp.get("slide_in", 0.45))
@@ -221,22 +239,32 @@ def build(spec, workdir):
         sd = os.path.join(workdir, f"sp{n}")
         os.makedirs(sd, exist_ok=True)
         inner = dict(sp)
-        inner["w"], inner["h"] = W, panel_h
+        inner["w"], inner["h"] = (W, panel_h) if orient == "v" else (panel_w, H)
         for k in range(frames):
             render(inner, k / (frames - 1)).save(os.path.join(sd, f"{k:05d}.png"))
         inputs += ["-framerate", str(fps), "-start_number", "0",
                    "-i", os.path.join(sd, "%05d.png")]
         chain.append(f"{cur}split=2[spa{n}][spb{n}]")
-        chain.append(f"[spb{n}]crop={W}:{top_h}:0:{crop_y},setsar=1[sptop{n}]")
         chain.append(f"color=c=0x070A11:s={W}x{H}:r={fps}[spbg{n}]")
-        chain.append(f"[spbg{n}][sptop{n}]overlay=0:0:shortest=1[spc{n}]")
         chain.append(f"[{idx}:v]tpad=start_duration={a:.3f}:start_mode=clone,"
                      f"setpts=PTS-STARTPTS[sppn{n}]")
-        chain.append(f"[spc{n}][sppn{n}]overlay=0:{top_h}:shortest=1[spf{n}]")
-        y = (f"if(lt(t,{a + sl:.3f}),{H}*(1-(t-{a:.3f})/{sl})," 
-             f"if(gt(t,{b - so:.3f}),{H}*((t-{b - so:.3f})/{so}),0))")
+        if orient == "v":
+            chain.append(f"[spb{n}]crop={W}:{top_h}:0:{crop_y},setsar=1[spvid{n}]")
+            chain.append(f"[spbg{n}][spvid{n}]overlay=0:0:shortest=1[spc{n}]")
+            chain.append(f"[spc{n}][sppn{n}]overlay=0:{top_h}:shortest=1[spf{n}]")
+            dist, axis = H, "y"
+        else:
+            vw = W - panel_w
+            cx = int(sp.get("crop_x", (W - vw) // 2))
+            chain.append(f"[spb{n}]crop={vw}:{H}:{cx}:0,setsar=1[spvid{n}]")
+            chain.append(f"[spbg{n}][spvid{n}]overlay={panel_w}:0:shortest=1[spc{n}]")
+            chain.append(f"[spc{n}][sppn{n}]overlay=0:0:shortest=1[spf{n}]")
+            dist, axis = -W, "x"
+        mv = (f"if(lt(t,{a + sl:.3f}),{dist}*(1-(t-{a:.3f})/{sl}),"
+              f"if(gt(t,{b - so:.3f}),{dist}*((t-{b - so:.3f})/{so}),0))")
+        xy = f"0:'{mv}'" if axis == "y" else f"'{mv}':0"
         out = f"[v{idx}]"
-        chain.append(f"[spa{n}][spf{n}]overlay=0:'{y}':"
+        chain.append(f"[spa{n}][spf{n}]overlay={xy}:"
                      f"enable='between(t,{a:.3f},{b:.3f})'{out}")
         cur = out
         idx += 1
@@ -261,6 +289,13 @@ def build(spec, workdir):
             # блок растёт вниз, якорь держим по верхней строке
             full_h = draw_block(lines, size, W, align).size[1]
             x, y = place(pos, img.size[0], full_h, W, H)
+            rot = float(b.get("rotate", 0))
+            if rot:
+                # вертикальный текст вдоль края: рисуется как обычный блок
+                # и поворачивается целиком
+                img = img.rotate(rot, expand=True, resample=Image.BICUBIC)
+            if "x" in b:
+                x, y = int(b["x"]), int(b["y"])
             path = os.path.join(workdir, f"b{n}_{k}.png")
             img.save(path)
             inputs += ["-i", path]
@@ -282,6 +317,12 @@ def build(spec, workdir):
         size = None
         for k in range(frames):
             im = render(w, k / (frames - 1))
+            if w.get("lean"):
+                im = cards._lean_back(im, float(w["lean"]))
+            sc = float(w.get("scale", 1.0))
+            if sc != 1.0:
+                im = im.resize((max(1, int(im.width * sc)), max(1, int(im.height * sc))),
+                               Image.LANCZOS)
             im.save(os.path.join(wd, f"{k:05d}.png"))
             size = im.size
         x = w.get("x")
