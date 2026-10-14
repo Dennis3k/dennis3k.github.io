@@ -201,6 +201,45 @@ def build(spec, workdir):
 
     cur = "[bg]"
     idx = 1
+
+    # Сплит: кадр целиком подменяется composite-ом «видео сверху, панель снизу».
+    # Панель выезжает снизу и уезжает обратно, видео в верхней половине живое.
+    for n, sp in enumerate(spec.get("split", [])):
+        render = cards.RENDERERS.get(sp.get("type", "split_list"))
+        if render is None:
+            sys.exit(f"неизвестный сплит: {sp.get('type')}")
+        a = at(float(sp["t"]))
+        b = at(float(sp["t"]) + float(sp["dur"]))
+        if b - a < 0.4:
+            continue
+        panel_h = int(sp.get("panel_h", 960))
+        top_h = H - panel_h
+        crop_y = int(sp.get("crop_y", 180))
+        sl = float(sp.get("slide_in", 0.45))
+        so = float(sp.get("slide_out", 0.35))
+        frames = max(2, int((b - a) * fps))
+        sd = os.path.join(workdir, f"sp{n}")
+        os.makedirs(sd, exist_ok=True)
+        inner = dict(sp)
+        inner["w"], inner["h"] = W, panel_h
+        for k in range(frames):
+            render(inner, k / (frames - 1)).save(os.path.join(sd, f"{k:05d}.png"))
+        inputs += ["-framerate", str(fps), "-start_number", "0",
+                   "-i", os.path.join(sd, "%05d.png")]
+        chain.append(f"{cur}split=2[spa{n}][spb{n}]")
+        chain.append(f"[spb{n}]crop={W}:{top_h}:0:{crop_y},setsar=1[sptop{n}]")
+        chain.append(f"color=c=0x070A11:s={W}x{H}:r={fps}[spbg{n}]")
+        chain.append(f"[spbg{n}][sptop{n}]overlay=0:0:shortest=1[spc{n}]")
+        chain.append(f"[{idx}:v]tpad=start_duration={a:.3f}:start_mode=clone,"
+                     f"setpts=PTS-STARTPTS[sppn{n}]")
+        chain.append(f"[spc{n}][sppn{n}]overlay=0:{top_h}:shortest=1[spf{n}]")
+        y = (f"if(lt(t,{a + sl:.3f}),{H}*(1-(t-{a:.3f})/{sl})," 
+             f"if(gt(t,{b - so:.3f}),{H}*((t-{b - so:.3f})/{so}),0))")
+        out = f"[v{idx}]"
+        chain.append(f"[spa{n}][spf{n}]overlay=0:'{y}':"
+                     f"enable='between(t,{a:.3f},{b:.3f})'{out}")
+        cur = out
+        idx += 1
     for n, b in enumerate(spec.get("blocks", [])):
         lines = [(t, int(a)) for t, a in b["lines"]]
         size = int(b.get("size", 64))
