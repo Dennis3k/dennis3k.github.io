@@ -58,7 +58,14 @@ def impact(dur=0.6):
     nz = _noise(cn)
     click[:cn] = (nz - _onepole(nz, np.full(cn, 1200.0, dtype=np.float32))) \
         * _env(cn, 0.001, power=4.0)
-    return (body * 0.85 + click * 0.45)
+    # средний стук: один низ на телефонном динамике не слышно вообще
+    kn = int(0.09 * SR)
+    knock = np.zeros(n, dtype=np.float32)
+    kt = np.arange(kn, dtype=np.float32) / SR
+    kf = 620 * np.exp(-26 * kt) + 300
+    knock[:kn] = np.sin(2 * np.pi * np.cumsum(kf) / SR).astype(np.float32) \
+        * _env(kn, 0.001, power=3.4)
+    return (body * 0.75 + knock * 0.5 + click * 0.5)
 
 
 def click(dur=0.09):
@@ -139,14 +146,33 @@ def bed(dur, bpm=104, key=55.0):
         p = int(i * (beat / 2) * SR)
         m = min(h.size, n - p)
         if m > 0:
-            out[p:p + m] += h[:m] * 0.22
+            out[p:p + m] += h[:m] * 0.4
 
-    # бас и минорное трезвучие, смена аккорда каждые 4 такта
+    # Бас и аккорды. Важно: основная масса подложки должна лежать в середине
+    # спектра. Телефонный динамик ниже ~400 Гц почти ничего не выдаёт, и бочка
+    # с басом, которые отлично слышны в наушниках, на телефоне пропадают.
     bars = np.floor(t / (beat * 4)).astype(np.int32)
     root = key * np.where(bars % 2 == 0, 1.0, 1.1892)   # i -> III
     bass = np.sin(2 * np.pi * np.cumsum(root) / SR).astype(np.float32)
+
     pad = np.zeros(n, dtype=np.float32)
-    for mult in (2.0, 2.3784, 3.0):
+    for mult in (8.0, 9.5137, 12.0):                    # те же ноты, двумя октавами выше
         pad += np.sin(2 * np.pi * np.cumsum(root * mult) / SR).astype(np.float32)
     swell = 0.5 + 0.5 * np.sin(2 * np.pi * t / (beat * 8))
-    return out * 0.55 + bass * 0.30 + pad * 0.055 * swell
+
+    # щипковый перебор восьмыми — то, что реально слышно на телефоне
+    arp = np.zeros(n, dtype=np.float32)
+    steps = (8.0, 12.0, 9.5137, 16.0, 12.0, 9.5137)
+    eighth = beat / 2
+    for i in range(int(dur / eighth)):
+        p0 = int(i * eighth * SR)
+        ln = min(int(eighth * 0.9 * SR), n - p0)
+        if ln <= 0:
+            break
+        f0 = float(root[min(p0, n - 1)]) * steps[i % len(steps)]
+        tt = np.arange(ln, dtype=np.float32) / SR
+        note = np.sin(2 * np.pi * f0 * tt).astype(np.float32)
+        note += 0.3 * np.sin(4 * np.pi * f0 * tt).astype(np.float32)
+        arp[p0:p0 + ln] += note * _env(ln, 0.004, power=2.6)
+
+    return (out * 0.45 + bass * 0.26 + pad * 0.10 * swell + arp * 0.16)

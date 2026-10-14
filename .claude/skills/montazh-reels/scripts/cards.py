@@ -232,3 +232,78 @@ RENDERERS = {
     "stylecards": stylecards,
     "comment": comment,
 }
+
+
+# ------------------------------------------------- половина экрана со списком
+def _tilt(img, k):
+    """Лёгкая перспектива: дальний край уже ближнего. k=0 — сильный наклон."""
+    w, h = img.size
+    d = int(h * 0.42 * (1 - k))          # насколько «уехал» дальний край
+    if d < 2:
+        return img
+    # QUAD задаёт четырёхугольник ИСХОДНИКА, который натянется на прямоугольник
+    quad = (0, -d, 0, h + d, w, h, w, 0)
+    return img.transform((w, h), Image.QUAD, quad, resample=Image.BICUBIC)
+
+
+def _row(text, num, w, h, accent):
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    # плита с градиентом: сверху светлее, снизу уходит в темноту — даёт объём
+    grad = Image.new("RGBA", (1, h))
+    gd = ImageDraw.Draw(grad)
+    for y in range(h):
+        v = y / max(1, h - 1)           # не f: f — это функция шрифта выше
+        gd.point((0, y), fill=(int(38 - 16 * v), int(44 - 18 * v),
+                               int(62 - 24 * v), 245))
+    plate = grad.resize((w, h), Image.BILINEAR)
+    mask = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, w - 1, h - 1), radius=22, fill=255)
+    img.paste(plate, (0, 0), mask)
+    d.rounded_rectangle((0, 0, w - 1, h - 1), radius=22,
+                        outline=(255, 255, 255, 40), width=2)
+    d.rounded_rectangle((0, 0, 8, h - 1), radius=4, fill=accent + (255,))
+    d.text((44, h // 2 - 26), num, font=f("Black", 40), fill=accent + (255,))
+    d.text((132, h // 2 - 24), text, font=f("SemiBold", 38), fill=WHITE)
+    return img
+
+
+def split_list(spec, p):
+    """Нижняя половина кадра: заголовок и пункты, прилетающие с наклоном."""
+    W, H = int(spec.get("w", 1080)), int(spec.get("h", 960))
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 255))
+    d = ImageDraw.Draw(img)
+    for y in range(H):                    # фон уходит вглубь
+        t = y / (H - 1)
+        d.line((0, y, W, y), fill=(int(10 + 16 * t), int(13 + 20 * t),
+                                   int(22 + 34 * t), 255))
+    d.line((0, 0, W, 0), fill=(79, 140, 255, 200), width=4)
+    tk = ease(seg(p, 0.0, 0.14))
+    d.text((60, int(46 - 20 * (1 - tk))), spec.get("title", ""),
+           font=f("Black", 52), fill=(255, 255, 255, int(255 * tk)))
+
+    rows = spec["items"]
+    rw, rh = W - 120, 118
+    top = 150
+    gap = (H - top - 40 - rh) / max(1, len(rows) - 1) if len(rows) > 1 else 0
+    for i, text in enumerate(rows):
+        k = ease(seg(p, 0.14 + i * 0.1, 0.42 + i * 0.1))
+        if k <= 0:
+            continue
+        accent = TL_COLORS[i % len(TL_COLORS)]
+        row = _row(text, f"{i + 1:02d}", rw, rh, accent)
+        row = _tilt(row, k)
+        s = 0.86 + 0.14 * k
+        row = row.resize((int(rw * s), int(rh * s)), Image.LANCZOS)
+        if k < 1:
+            row.putalpha(row.getchannel("A").point(lambda a, k=k: int(a * k)))
+        x = int(60 + (1 - k) * 260)
+        y = int(top + i * gap + (1 - k) * 36)
+        shadow = Image.new("RGBA", row.size, (0, 0, 0, int(90 * k)))
+        img.alpha_composite(Image.composite(shadow, Image.new("RGBA", row.size),
+                                            row.getchannel("A")), (x + 6, y + 10))
+        img.alpha_composite(row, (x, y))
+    return img
+
+
+RENDERERS["split_list"] = split_list
