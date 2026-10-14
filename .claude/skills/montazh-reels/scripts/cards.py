@@ -246,7 +246,8 @@ def _tilt(img, k):
     return img.transform((w, h), Image.QUAD, quad, resample=Image.BICUBIC)
 
 
-def _row(text, num, w, h, accent):
+def _row(text, num, w, h, accent, text_font=None):
+    """Плита пункта. Все размеры от высоты плиты: работает и на 1080, и на 500."""
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     # плита с градиентом: сверху светлее, снизу уходит в темноту — даёт объём
@@ -257,19 +258,27 @@ def _row(text, num, w, h, accent):
         gd.point((0, y), fill=(int(38 - 16 * v), int(44 - 18 * v),
                                int(62 - 24 * v), 245))
     plate = grad.resize((w, h), Image.BILINEAR)
+    r = max(8, int(h * 0.19))
     mask = Image.new("L", (w, h), 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, 0, w - 1, h - 1), radius=22, fill=255)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, w - 1, h - 1), radius=r, fill=255)
     img.paste(plate, (0, 0), mask)
-    d.rounded_rectangle((0, 0, w - 1, h - 1), radius=22,
+    d.rounded_rectangle((0, 0, w - 1, h - 1), radius=r,
                         outline=(255, 255, 255, 40), width=2)
-    d.rounded_rectangle((0, 0, 8, h - 1), radius=4, fill=accent + (255,))
-    d.text((44, h // 2 - 26), num, font=f("Black", 40), fill=accent + (255,))
-    d.text((132, h // 2 - 24), text, font=f("SemiBold", 38), fill=WHITE)
+    d.rounded_rectangle((0, 0, max(5, int(h * 0.07)), h - 1), radius=4,
+                        fill=accent + (255,))
+    nf = f("Black", max(14, int(h * 0.34)))
+    nx = int(h * 0.36)
+    d.text((nx, h // 2), num, font=nf, fill=accent + (255,), anchor="lm")
+    tx = nx + int(d.textlength("00", font=nf)) + int(h * 0.22)
+    tf = text_font or _fit_font("SemiBold", text, w - tx - int(h * 0.2), int(h * 0.32))
+    d.text((tx, h // 2), text, font=tf, fill=WHITE, anchor="lm")
     return img
 
 
 def split_list(spec, p):
-    """Нижняя половина кадра: заголовок и пункты, прилетающие с наклоном."""
+    """Половина кадра: заголовок и пункты, прилетающие с наклоном.
+    Вёрстка считается от размеров панели — годится и для нижней половины
+    рилса (1080x960), и для левой половины окна (500x640)."""
     W, H = int(spec.get("w", 1080)), int(spec.get("h", 960))
     img = Image.new("RGBA", (W, H), (0, 0, 0, 255))
     d = ImageDraw.Draw(img)
@@ -277,33 +286,261 @@ def split_list(spec, p):
         t = y / (H - 1)
         d.line((0, y, W, y), fill=(int(10 + 16 * t), int(13 + 20 * t),
                                    int(22 + 34 * t), 255))
-    d.line((0, 0, W, 0), fill=(79, 140, 255, 200), width=4)
-    tk = ease(seg(p, 0.0, 0.14))
-    d.text((60, int(46 - 20 * (1 - tk))), spec.get("title", ""),
-           font=f("Black", 52), fill=(255, 255, 255, int(255 * tk)))
-
+    if W >= H:
+        d.line((0, 0, W, 0), fill=(79, 140, 255, 200), width=4)
+    else:
+        d.line((W - 2, 0, W - 2, H), fill=(79, 140, 255, 200), width=4)
+    pad = max(20, int(min(W, H) * 0.055))
     rows = spec["items"]
-    rw, rh = W - 120, 118
-    top = 150
-    gap = (H - top - 40 - rh) / max(1, len(rows) - 1) if len(rows) > 1 else 0
+    n = len(rows)
+
+    badge = spec.get("badge")
+    ty = pad
+    if badge:                             # плашка над заголовком, как «ТОП-5»
+        bf = f("Bold", max(14, int(H * 0.03)))
+        bw = int(d.textlength(badge, font=bf)) + 28
+        bh = int(H * 0.05)
+        d.rounded_rectangle((pad, ty, pad + bw, ty + bh), radius=8,
+                            fill=(40, 46, 66, 255), outline=(234, 179, 8, 255), width=2)
+        d.text((pad + 14, ty + bh // 2), badge, font=bf, fill=WHITE, anchor="lm")
+        ty += bh + int(pad * 0.6)
+    tk = ease(seg(p, 0.0, 0.14))
+    tf = _fit_font("Black", spec.get("title", ""), W - 2 * pad, int(min(52, H * 0.075)))
+    d.text((pad, int(ty - 18 * (1 - tk))), spec.get("title", ""),
+           font=tf, fill=(255, 255, 255, int(255 * tk)))
+    top = ty + int(tf.size * 1.5)
+
+    avail = H - top - pad
+    slot = avail / n
+    rh = int(min(118, slot * 0.82))
+    rw = W - 2 * pad
+    longest = max(rows, key=len)
+    probe = _row(longest, "00", rw, rh, (255, 255, 255))   # общий кегль для всех плит
+    nx = int(rh * 0.36)
+    nf = f("Black", max(14, int(rh * 0.34)))
+    tx = nx + int(ImageDraw.Draw(probe).textlength("00", font=nf)) + int(rh * 0.22)
+    shared = _fit_font("SemiBold", longest, rw - tx - int(rh * 0.2), int(rh * 0.32))
     for i, text in enumerate(rows):
         k = ease(seg(p, 0.14 + i * 0.1, 0.42 + i * 0.1))
         if k <= 0:
             continue
         accent = TL_COLORS[i % len(TL_COLORS)]
-        row = _row(text, f"{i + 1:02d}", rw, rh, accent)
+        row = _row(text, f"{i + 1:02d}", rw, rh, accent, text_font=shared)
         row = _tilt(row, k)
         s = 0.86 + 0.14 * k
-        row = row.resize((int(rw * s), int(rh * s)), Image.LANCZOS)
+        row = row.resize((max(1, int(rw * s)), max(1, int(rh * s))), Image.LANCZOS)
         if k < 1:
             row.putalpha(row.getchannel("A").point(lambda a, k=k: int(a * k)))
-        x = int(60 + (1 - k) * 260)
-        y = int(top + i * gap + (1 - k) * 36)
+        x = int(pad + (1 - k) * W * 0.24)
+        y = int(top + i * slot + (1 - k) * rh * 0.3)
         shadow = Image.new("RGBA", row.size, (0, 0, 0, int(90 * k)))
         img.alpha_composite(Image.composite(shadow, Image.new("RGBA", row.size),
-                                            row.getchannel("A")), (x + 6, y + 10))
+                                            row.getchannel("A")), (x + 6, y + 8))
         img.alpha_composite(row, (x, y))
     return img
 
 
 RENDERERS["split_list"] = split_list
+
+
+# =============================================================== 3D-элементы
+def _fit_font(weight, text, max_w, start, floor=14):
+    """Самый крупный кегль, при котором строка влезает в max_w."""
+    size = start
+    probe = ImageDraw.Draw(Image.new("RGBA", (4, 4)))
+    while size > floor and probe.textlength(text, font=f(weight, size)) > max_w:
+        size -= 1
+    return f(weight, size)
+
+
+def _lean_back(img, amount):
+    """Наклон «от зрителя»: верхний край уже нижнего, как у лежащей панели."""
+    w, h = img.size
+    d = int(w * amount)
+    if d < 1:
+        return img
+    quad = (-d, 0, 0, h, w, h, w + d, 0)
+    return img.transform((w, h), Image.QUAD, quad, resample=Image.BICUBIC)
+
+
+# --------------------------------------------------------- хромированный титул
+def chrome_title(spec, p):
+    """Объёмный хромированный текст: экструзия слоями + градиентное лицо + блик."""
+    text = spec.get("text", "TITLE")
+    size = int(spec.get("size", 120))
+    depth = int(spec.get("depth", 14))
+    ft = f("Black", size)
+    probe = ImageDraw.Draw(Image.new("RGBA", (4, 4)))
+    tw = int(probe.textlength(text, font=ft))
+    W, H = tw + depth + 60, int(size * 1.35) + depth + 40
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+
+    mask = Image.new("L", (W, H), 0)
+    ImageDraw.Draw(mask).text((30, 20), text, font=ft, fill=255)
+
+    # экструзия: слои сдвигаются вниз-вправо и темнеют вглубь
+    for i in range(depth, 0, -1):
+        shade = int(40 + 70 * (1 - i / depth))
+        layer = Image.new("RGBA", (W, H), (shade, shade + 6, shade + 18, 255))
+        shifted = Image.new("L", (W, H), 0)
+        shifted.paste(mask, (i, i))
+        img.paste(layer, (0, 0), shifted)
+
+    # лицо: хром — светлый верх, тёмная полоса горизонта, светлый низ
+    grad = Image.new("RGBA", (1, H))
+    gd = ImageDraw.Draw(grad)
+    for y in range(H):
+        v = y / (H - 1)
+        if v < 0.45:
+            c = int(255 - 70 * (v / 0.45))
+        elif v < 0.55:
+            c = int(185 - 110 * ((v - 0.45) / 0.1))
+        else:
+            c = int(75 + 170 * ((v - 0.55) / 0.45))
+        gd.point((0, y), fill=(c, min(255, c + 6), min(255, c + 16), 255))
+    face = grad.resize((W, H), Image.BILINEAR)
+
+    # блик: диагональная полоса проезжает слева направо
+    sh = seg(p, 0.35, 0.75)
+    if 0 < sh < 1:
+        band = Image.new("L", (W, H), 0)
+        bx = int(-W * 0.3 + sh * W * 1.6)
+        ImageDraw.Draw(band).polygon(
+            [(bx, 0), (bx + 46, 0), (bx + 46 - H // 2, H), (bx - H // 2, H)], fill=110)
+        face = Image.composite(Image.new("RGBA", (W, H), (255, 255, 255, 255)),
+                               face, band)
+    img.paste(face, (0, 0), mask)
+    rim = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(rim).text((30, 20), text, font=ft, fill=(0, 0, 0, 0),
+                             stroke_width=2, stroke_fill=(255, 255, 255, 170))
+    img.alpha_composite(rim)
+
+    # вход: прилетает из глубины с перелётом
+    k = seg(p, 0.0, 0.22)
+    if k < 1:
+        s = 1.7 - 0.7 * ease(k) + 0.06 * (k > 0.7) * (1 - k) * 10
+        s = max(0.4, s)
+        sw, sh2 = int(W * s), int(H * s)
+        big = img.resize((sw, sh2), Image.LANCZOS)
+        out = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        out.alpha_composite(big, ((W - sw) // 2, (H - sh2) // 2)) if s <= 1 else \
+            out.alpha_composite(big.crop(((sw - W) // 2, (sh2 - H) // 2,
+                                          (sw - W) // 2 + W, (sh2 - H) // 2 + H)))
+        out.putalpha(out.getchannel("A").point(lambda a, k=k: int(a * ease(k))))
+        return out
+    return img
+
+
+# ------------------------------------------------------ объёмный эквалайзер
+def eq_bars(spec, p):
+    """Изометрические столбики: перед, верх и бок разной яркости дают объём."""
+    n = int(spec.get("bars", 9))
+    W, H = int(spec.get("w", 1000)), int(spec.get("h", 420))
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cols = [(255, 122, 48), (255, 92, 140), (255, 160, 60)]
+    bw = int(W / (n * 1.35))
+    dx, dy = int(bw * 0.45), int(bw * 0.3)          # смещение «вглубь»
+    for i in range(n):
+        k = ease(seg(p, 0.03 * i, 0.28 + 0.03 * i))
+        wob = 0.75 + 0.25 * abs(__import__("math").sin(p * 18 + i * 1.7))
+        h = int((H - dy - 10) * (0.35 + 0.6 * ((i * 37) % 10) / 10) * k * wob)
+        if h < 4:
+            continue
+        x = int(i * W / n + 6)
+        base = H - 4
+        c = cols[i % len(cols)]
+        front = (x, base - h, x + bw, base)
+        d.rectangle(front, fill=c + (245,))
+        side = [(x + bw, base - h), (x + bw + dx, base - h - dy),
+                (x + bw + dx, base - dy), (x + bw, base)]
+        d.polygon(side, fill=tuple(int(v * 0.62) for v in c) + (245,))
+        top = [(x, base - h), (x + dx, base - h - dy),
+               (x + bw + dx, base - h - dy), (x + bw, base - h)]
+        d.polygon(top, fill=tuple(min(255, int(v * 1.18) + 25) for v in c) + (250,))
+    return img
+
+
+# ------------------------------------------------------------- график роста
+def growth_chart(spec, p):
+    pts = spec.get("points", [1, 2, 3, 5, 8])
+    labels = spec.get("labels", [""] * len(pts))
+    W, H = int(spec.get("w", 820)), int(spec.get("h", 520))
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    panel(d, (6, 6, W - 6, H - 6))
+    d.text((44, 34), spec.get("title", ""), font=f("Bold", 30), fill=DIM)
+    x0, x1, y0, y1 = 60, W - 60, H - 90, 170
+    lo, hi = 0, max(pts) * 1.1
+    xy = [(x0 + (x1 - x0) * i / (len(pts) - 1),
+           y0 - (y0 - y1) * (v - lo) / (hi - lo)) for i, v in enumerate(pts)]
+    for gx in range(len(pts)):
+        X = x0 + (x1 - x0) * gx / (len(pts) - 1)
+        d.line((X, y1, X, y0), fill=(255, 255, 255, 18), width=1)
+        d.text((X - 20, y0 + 22), str(labels[gx]), font=f("Medium", 22), fill=DIM)
+    k = ease(seg(p, 0.08, 0.7))
+    total = len(xy) - 1
+    upto = k * total
+    drawn = [xy[0]]
+    for i in range(1, len(xy)):
+        if i <= upto:
+            drawn.append(xy[i])
+        else:
+            fr = upto - (i - 1)
+            if fr > 0:
+                a, b = xy[i - 1], xy[i]
+                drawn.append((a[0] + (b[0] - a[0]) * fr, a[1] + (b[1] - a[1]) * fr))
+            break
+    if len(drawn) > 1:
+        area = drawn + [(drawn[-1][0], y0), (drawn[0][0], y0)]
+        fill = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        ImageDraw.Draw(fill).polygon(area, fill=ACCENT[:3] + (60,))
+        img.alpha_composite(fill)
+        d.line(drawn, fill=ACCENT, width=7, joint="curve")
+        ex, ey = drawn[-1]
+        for r, a in ((26, 40), (17, 90), (9, 255)):
+            d.ellipse((ex - r, ey - r, ex + r, ey + r), fill=ACCENT[:3] + (a,))
+    big = spec.get("value", pts[-1]) * ease(seg(p, 0.1, 0.75))
+    d.text((44, 74), spec.get("prefix", "") + spaced(big) + spec.get("suffix", ""),
+           font=f("Black", 64), fill=WHITE)
+    return img
+
+
+# ----------------------------------------------------------- веер кейсов
+def cases_fan(spec, p):
+    names = spec.get("names", ["A", "B", "C"])
+    W, H = int(spec.get("w", 1000)), int(spec.get("h", 620))
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    n = len(names)
+    order = sorted(range(n), key=lambda i: -abs(i - (n - 1) / 2))
+    step = min(205, (W - 220) / max(1, n - 1))
+    for i in order:
+        name = names[i]
+        k = ease(seg(p, 0.05 + i * 0.08, 0.4 + i * 0.08))
+        if k <= 0:
+            continue
+        cw, ch = 200, 150
+        card = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
+        cd = ImageDraw.Draw(card)
+        col = TL_COLORS[i % len(TL_COLORS)]
+        cd.rounded_rectangle((0, 0, cw - 1, ch - 1), radius=24, fill=(20, 24, 36, 245),
+                             outline=col + (220,), width=3)
+        cd.rounded_rectangle((0, 0, cw - 1, 14), radius=7, fill=col + (255,))
+        ft = _fit_font("Black", name, cw - 34, 40)
+        tw = cd.textlength(name, font=ft)
+        cd.text(((cw - tw) / 2, 56), name, font=ft, fill=WHITE)
+        card = _tilt(card, 0.55 + 0.45 * k)
+        spread = (i - (n - 1) / 2)
+        ang = -spread * 9 * k
+        card = card.rotate(ang, expand=True, resample=Image.BICUBIC)
+        s = 0.6 + 0.4 * k
+        card = card.resize((int(card.width * s), int(card.height * s)), Image.LANCZOS)
+        cx = W / 2 + spread * step * k - card.width / 2
+        cy = H * 0.44 + abs(spread) * 30 * k - card.height / 2 + (1 - k) * 120
+        card.putalpha(card.getchannel("A").point(lambda a, k=k: int(a * min(1, k * 1.4))))
+        img.alpha_composite(card, (int(cx), int(cy)))
+    return img
+
+
+RENDERERS.update({"chrome_title": chrome_title, "eq_bars": eq_bars,
+                  "growth_chart": growth_chart, "cases_fan": cases_fan})
