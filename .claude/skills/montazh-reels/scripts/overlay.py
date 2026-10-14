@@ -151,8 +151,13 @@ def build(spec, workdir):
 
     lufs = spec.get("loudness", -14)
     atrim = f"[0:a]atrim=start={t0}" + (f":end={t1}" if t1 else "")
+    # Три шага, и порядок важен. loudnorm задаёт уровень, но не сужает диапазон;
+    # компрессор на тихом исходнике почти не срабатывает, пока уровень не поднят.
+    # Поэтому: подняли -> сжали -> выставили итоговую громкость.
     chain.append(f"{atrim},asetpts=PTS-STARTPTS,"
-                 f"loudnorm=I={lufs}:TP=-1.0:LRA=7,aresample=48000[aout]")
+                 f"loudnorm=I={lufs - 2}:TP=-2,"
+                 f"acompressor=threshold=-18dB:ratio=6:attack=5:release=150:makeup=3,"
+                 f"loudnorm=I={lufs}:TP=-1.0,aresample=48000[aout]")
 
     return (["ffmpeg", "-hide_banner", "-y"] + inputs +
             ["-filter_complex", ";".join(chain),
