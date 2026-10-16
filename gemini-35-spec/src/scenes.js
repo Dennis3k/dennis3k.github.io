@@ -956,11 +956,13 @@ export function S13(ctx, L, t) {
   ctx.globalAlpha = inP;
   ctx.translate(0, (1 - inP) * 18 * u);
   sparkle(ctx, W / 2, cy - (L.vert ? H * 0.085 : H * 0.14), Math.min(W, H) * 0.045, {});
-  const s = Math.min(W, H) * (L.vert ? 0.115 : 0.105);
+  const SIG = 'Denis Unagst';
+  const sCap = Math.min(W, H) * (L.vert ? 0.115 : 0.105);
+  const s = Math.min(sCap, fitSize(ctx, SIG, W * 0.78, 700, sCap, -0.02));
   font(ctx, s, 700, -s * 0.02);
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillStyle = '#0B0E18';
-  ctx.fillText('dennis3k', W / 2, cy);
+  ctx.fillText(SIG, W / 2, cy);
   const s2 = s * 0.22;
   font(ctx, s2, 500, s2 * 0.08);
   ctx.fillStyle = 'rgba(11,14,24,0.55)';
@@ -982,11 +984,13 @@ export function S13(ctx, L, t) {
   const dp = smooth(inv(0.8, 1.4, t));
   if (dp > 0) {
     ctx.save(); ctx.globalAlpha = dp;
-    const ds = Math.min(W, H) * 0.021;
+    const dTxt = 'Spec work for portfolio purposes only. Not affiliated with, sponsored or endorsed by Google LLC.';
+    const dCap = Math.min(W, H) * 0.021;
+    const ds = Math.min(dCap, fitSize(ctx, dTxt, W * 0.86, 450, dCap, 0));
     font(ctx, ds, 450, 0);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillStyle = 'rgba(11,14,24,0.58)';
-    ctx.fillText('Spec work for portfolio purposes only. Not affiliated with, sponsored or endorsed by Google LLC.', W / 2, H * (L.vert ? 0.90 : 0.90));
+    ctx.fillText(dTxt, W / 2, H * 0.90);
     ctx.restore();
   }
   // gentle sign-off

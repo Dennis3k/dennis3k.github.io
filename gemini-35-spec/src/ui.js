@@ -421,7 +421,7 @@ export function answerList(ctx, w, h, films, p, t) {
 }
 
 /* ---------------- browser window ---------------- */
-export function browserWindow(ctx, x, y, w, h, t, { neon = 0, name = 'Alex', reveal = 1 } = {}) {
+export function browserWindow(ctx, x, y, w, h, t, { neon = 0, name = 'Denis', reveal = 1 } = {}) {
   const r = w * 0.022;
   ctx.save();
   ctx.save(); ctx.filter = `blur(${h * 0.05}px)`; ctx.fillStyle = 'rgba(8,14,36,0.45)';
