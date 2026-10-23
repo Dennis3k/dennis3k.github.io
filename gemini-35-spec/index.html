@@ -17,6 +17,14 @@ window.__subs = null;                 // override for stills
 window.__render = (t, sub) => R.frame(ctx, t, { sub: sub ?? window.__subs });
 window.__frame = (f) => { R.frame(ctx, f / FPS, { sub: window.__subs }); return cv.toDataURL('image/png'); };
 window.__at = (t, sub) => { R.frame(ctx, t, { sub }); return cv.toDataURL('image/png'); };
+// обложки декодируются до __ready: рендер кадра обязан быть синхронным
+window.__posters = {};
+await Promise.all(['exmachina', 'alita', 'upgrade'].map(async (n) => {
+  try {
+    const r = await fetch(`./assets/posters/${n}.jpg`);
+    if (r.ok) window.__posters[n] = await createImageBitmap(await r.blob());
+  } catch (e) { /* нет файла — сцена нарисует запасную обложку кодом */ }
+}));
 await document.fonts.ready;
 // warm the font cache so the first frames measure identically
 const w1 = (() => { ctx.font = '400 100px "Inter Display"'; return ctx.measureText('Gemini').width; })();

@@ -914,15 +914,8 @@ export function S12(ctx, L, t) {
     ctx.clip();
     googleG(ctx, cx, cy, Rg);
     ctx.restore();
-    // the bar lands last
-    if (pg > 0.92) {
-      const k = inv(0.92, 1, pg);
-      ctx.save(); ctx.globalAlpha = k;
-      ctx.fillStyle = G_BLUE;
-      const wbar = Rg * 0.30;
-      roundRect(ctx, cx + Rg * 0.06, cy - wbar * 0.5, Rg * 0.94 * k, wbar, wbar * 0.12); ctx.fill();
-      ctx.restore();
-    }
+    // перекладину рисует сам googleG. Вторая, своя, стояла здесь на другой
+    // высоте и давала прямоугольный зубец в середине буквы.
   }
   // twinkle
   const tw = inv(1.95, 2.45, t);
@@ -973,7 +966,7 @@ export function S13(ctx, L, t) {
   const s2 = s * 0.22;
   font(ctx, s2, 500, s2 * 0.08);
   ctx.fillStyle = 'rgba(11,14,24,0.55)';
-  ctx.fillText('AI MOTION  ·  EVERY FRAME DRAWN IN CODE', W / 2, cy + s * 0.72);
+  ctx.fillText('AI MOTION  ·  ANIMATED IN CODE', W / 2, cy + s * 0.72);
   ctx.restore();
 
   // thin gemini rule, wipes in

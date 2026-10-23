@@ -1,8 +1,10 @@
-# Gemini 3.5 — spec motion ad, every frame drawn in code
+# Gemini 3.5 — spec motion ad, animated in code
 
 A 24 s + 2 s end-card film at 30 fps, delivered in **16:9 (1920×1080)** and a real
-**9:16 (1080×1920) re-layout** — not a crop. Every frame is drawn by JavaScript into
-a canvas: no stock footage, no bitmaps, no After Effects project.
+**9:16 (1080×1920) re-layout** — not a crop. Every frame is composed by JavaScript
+into a canvas: no stock footage and no After Effects project. The only bitmaps in it
+are three film posters, shown on the phone screens in the answers scene; everything
+else — type, UI, devices, effects, the logo — is geometry drawn at render time.
 
 Neither the score nor the effects in the delivered mix are synthesised any more.
 A supplied track carries the music and 17 of the 18 effect slots are filled from
@@ -11,7 +13,9 @@ them — including cutting the track into two pieces so that its own drop lands 
 both of the film's, at 3.62 s and 16.15 s — and `tools/sfxlib.py` loads them.
 `tools/score.py` still writes everything the libraries do not cover, and mutes its
 own drum kit, bass and arpeggio when a bed is present so the two do not stack.
-`assets/sfx` is gitignored, so a fresh clone rebuilds the all-synthesised version
+`assets/sfx` and `assets/posters` are gitignored — the posters are studio artwork and
+the effects are licensed to the subscriber, so neither belongs in a public repository.
+A fresh clone therefore rebuilds the all-synthesised version, with posters drawn in code
 instead — which is the right default, but means the committed mp4s and the ones you
 would render are not the same mix.
 

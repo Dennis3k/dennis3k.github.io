@@ -311,16 +311,39 @@ export function inputBar(ctx, w, h, { text = '', caret = false, orb = 0, sendGlo
 
 /* ---------------- answers ---------------- */
 export const FILMS = [
-  { title: 'Neon Harbour', meta: '2024 · Drama · 1h 52m', why: 'Slow-burn, luminous night city.', seed: 11, pal: ['#0E2A6B', '#2B6CF6', '#9BD1FF'] },
-  { title: 'The Quiet Orbit', meta: '2021 · Sci-fi · 2h 04m', why: 'Patient, weightless, hopeful.', seed: 23, pal: ['#1B1040', '#7A4FD6', '#F3C7FF'] },
-  { title: 'Paper Lanterns', meta: '2019 · Romance · 1h 38m', why: 'Warm, small, very easy to love.', seed: 37, pal: ['#4A1620', '#E0624F', '#FFD9A8'] },
-  { title: 'Nine Winters', meta: '2023 · Thriller · 1h 47m', why: 'Cold, tight, one long chase.', seed: 51, pal: ['#09232B', '#1E8E8E', '#C9F2EC'] },
-  { title: 'Salt & Signal', meta: '2022 · Doc · 1h 25m', why: 'Quiet coast, loud ideas.', seed: 67, pal: ['#2C2208', '#C79A2B', '#FFF0C2'] },
+  { title: 'Ex Machina', img: 'exmachina', rating: '7.7', year: '2014',
+    meta: 'Sci-fi · 1h 48m', dir: 'Alex Garland',
+    why: 'A test with no right answer.', seed: 11, pal: ['#0E2A6B', '#2B6CF6', '#9BD1FF'] },
+  { title: 'Alita: Battle Angel', img: 'alita', rating: '7.3', year: '2019',
+    meta: 'Action · 2h 02m', dir: 'Robert Rodriguez',
+    why: 'Weightless, and it knows it.', seed: 23, pal: ['#1B1040', '#7A4FD6', '#F3C7FF'] },
+  { title: 'Upgrade', img: 'upgrade', rating: '7.5', year: '2018',
+    meta: 'Thriller · 1h 40m', dir: 'Leigh Whannell',
+    why: 'Lean, fast, and very mean.', seed: 37, pal: ['#4A1620', '#E0624F', '#FFD9A8'] },
 ];
 
 /** fully code-drawn poster artwork */
 export function poster(ctx, x, y, w, h, film, t = 0) {
   const r = w * 0.07;
+  const bm = (typeof window !== 'undefined' && window.__posters) ? window.__posters[film.img] : null;
+  if (bm) {
+    ctx.save();
+    roundRect(ctx, x, y, w, h, r); ctx.clip();
+    // вписываем по большей стороне: у обложек разные пропорции (2:3 и 3:4),
+    // а рамка в карточке одна, иначе ряд телефонов «поедет»
+    const k = Math.max(w / bm.width, h / bm.height);
+    const dw = bm.width * k, dh = bm.height * k;
+    ctx.drawImage(bm, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+    const g = ctx.createLinearGradient(0, y + h * 0.55, 0, y + h);
+    g.addColorStop(0, 'rgba(6,8,16,0)'); g.addColorStop(1, 'rgba(6,8,16,0.35)');
+    ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+    ctx.restore();
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.16)'; ctx.lineWidth = Math.max(1, w * 0.006);
+    roundRect(ctx, x, y, w, h, r); ctx.stroke();
+    ctx.restore();
+    return;
+  }
   ctx.save();
   roundRect(ctx, x, y, w, h, r); ctx.clip();
   const [c0, c1, c2] = film.pal;
@@ -386,11 +409,20 @@ export function wrapText(ctx, text, x, y, maxW, lh) {
   return out.length;
 }
 
+function starMark(ctx, x, y, r, color = '#F5C518') {
+  ctx.save(); ctx.fillStyle = color; ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const rr = i % 2 ? r * 0.44 : r;
+    ctx[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+  }
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+
 /** answer view inside a phone: one film card */
 export function answerList(ctx, w, h, films, p, t) {
   const pin = clamp(p);
   ctx.save();
-  // the user's prompt bubble
   ctx.globalAlpha = clamp(pin * 2);
   ctx.fillStyle = 'rgba(255,255,255,0.09)';
   font(ctx, w * 0.038, 450);
@@ -405,18 +437,50 @@ export function answerList(ctx, w, h, films, p, t) {
   const a = clamp((pin - 0.1) / 0.6);
   ctx.save(); ctx.globalAlpha = a;
   ctx.translate(0, (1 - a) * h * 0.06);
-  sparkle(ctx, w * 0.11, h * 0.235, w * 0.026, {});
+
+  sparkle(ctx, w * 0.11, h * 0.233, w * 0.026, {});
   ctx.fillStyle = 'rgba(255,255,255,0.72)'; font(ctx, w * 0.036, 450);
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  ctx.fillText('Here are three for tonight', w * 0.17, h * 0.235);
-  poster(ctx, w * 0.10, h * 0.285, w * 0.52, h * 0.30, f, t);
-  ctx.fillStyle = '#fff'; font(ctx, w * 0.052, 600);
+  ctx.fillText('Here are three for tonight', w * 0.17, h * 0.233);
+
+  // обложка слева, данные справа — так помещается и название, и рейтинг
+  const px = w * 0.10, pw = w * 0.38, ph = pw * 1.5;
+  const py = h * 0.278;
+  poster(ctx, px, py, pw, ph, f, t);
+
+  const cx = px + pw + w * 0.055;
+  const cw = w * 0.90 - cx;
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#fff';
+  const ts = w * 0.050;
+  font(ctx, ts, 600, -ts * 0.01);
   ctx.textBaseline = 'alphabetic';
-  ctx.fillText(f.title, w * 0.10, h * 0.635);
-  ctx.fillStyle = 'rgba(255,255,255,0.55)'; font(ctx, w * 0.034, 450);
-  ctx.fillText(f.meta, w * 0.10, h * 0.672);
+  const lines = wrapText(ctx, f.title, cx, py + ts * 1.9, cw, ts * 1.12);
+
+  let yy = py + ts * 1.9 + ts * 0.95;
+  const rs = w * 0.040;
+  starMark(ctx, cx + rs * 0.42, yy, rs * 0.52);
+  font(ctx, rs, 600);
+  ctx.fillStyle = '#fff';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(f.rating, cx + rs * 1.15, yy);
+  const rw = ctx.measureText(f.rating).width;
+  font(ctx, rs * 0.72, 450);
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fillText('/10  IMDb', cx + rs * 1.25 + rw, yy + rs * 0.04);
+
+  yy += rs * 1.35;
+  font(ctx, w * 0.033, 450);
+  ctx.fillStyle = 'rgba(255,255,255,0.62)';
+  ctx.fillText(`${f.year} · ${f.meta}`, cx, yy);
+  yy += w * 0.048;
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fillText(f.dir, cx, yy);
+
   ctx.fillStyle = 'rgba(255,255,255,0.70)'; font(ctx, w * 0.036, 450);
-  wrapText(ctx, f.why, w * 0.10, h * 0.735, w * 0.80, h * 0.042);
+  ctx.textBaseline = 'alphabetic';
+  wrapText(ctx, f.why, w * 0.10, py + ph + h * 0.052, w * 0.80, h * 0.042);
+  void lines;
   ctx.restore();
 }
 

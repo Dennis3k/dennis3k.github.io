@@ -77,11 +77,15 @@ export function googleG(ctx, x, y, R, { alpha = 1, mono = null } = {}) {
   seg(162, 222, G_YEL);
   seg(222, 292, G_GRN);
   seg(292, 360, G_BLUE);
-  // the bar
+  // Перекладина. Её верхняя грань лежит ровно на центре круга — там же,
+  // где кончается синяя дуга. Если поднять её выше, угол торчит в пустой
+  // середине буквы отдельным прямоугольным зубцом.
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.clip();   // правый край режет сам круг
   ctx.fillStyle = mono || G_BLUE;
-  const barY = y - w * 0.16;
-  roundRect(ctx, x + R * 0.02, barY, R * 0.98, w, w * 0.06);
+  roundRect(ctx, x + R * 0.04, y, R * 1.10, w, w * 0.08);
   ctx.fill();
+  ctx.restore();
   ctx.restore();
 }
 
