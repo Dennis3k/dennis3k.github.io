@@ -62,7 +62,14 @@ HASBED = BED is not None
 # у присланного трека своя ритм-секция: мои барабаны, бас и арпеджио молчат,
 # пэды уходят на подклад, суб-удары остаются — они ложатся под дропы трека
 W_RHY = 0.0 if HASBED else 1.0
-W_PAD = 0.30 if HASBED else 1.0
+# Гармония синтеза под чужим треком не приглушается, а выключается. Присланный
+# трек в си-бемоль миноре, синтез построен от ре: ре весит в нём 2% и стоит
+# 10-м из 12. Полутон к тонике — это не «подклад», это грязь.
+W_PAD = 0.0 if HASBED else 1.0
+# энд-кард звучит под затухающим треком, поэтому переводится в его тональность
+BASE = 146.83 * (2**(-4/12) if HASBED else 1.0)
+END_CHORD = [3, 7, 10, 15] if HASBED else [0, 4, 7, 11, 16]
+END_HOOK = [3, 7, 10, 15] if HASBED else [7, 12, 14, 16]
 BED_DB = -6.0        # уровень присланного трека относительно остального микса
 BED_DUCK_DB = -5.0   # насколько трек расступается под эффектами
 if HASBED: print('фоновый трек подключён: ритм-секция синтеза отключена')
@@ -354,13 +361,13 @@ for j, sm in enumerate(HOOK):
 # 3. дроп 1 — несёт широкий яркий аккорд, суб только подпирает
 place_pre(sfx, S('suck', suck(0.34)), DROP1, 0.7, trim=1.10)
 place_low(S('sub_drop', sub_hit(70, 32, 0.46, 1.8)), DROP1, 0.95)
-place(music, stab(Dm, 1.4), DROP1, 0.80, width=16)
+place(music, stab(Dm, 1.4), DROP1, W_PAD*0.80, width=16)
 place_impact(sfx, 'impact_mid', impact(0.7, 130, 1.25), DROP1, 0.95, width=8, bright=0.55)
 place(music, S('crash', crash(2.0)), DROP1, 0.30, pan=0.15)
-place(music, pad([0, 7, 12, 16], 2.4, cut=2000), DROP1+0.05, 0.40, width=20)
-place(music, shimmer([0, 7, 12], 2.2), DROP1+0.05, 0.9, width=22)
+place(music, pad([0, 7, 12, 16], 2.4, cut=2000), DROP1+0.05, W_PAD*0.40, width=20)
+place(music, shimmer([0, 7, 12], 2.2), DROP1+0.05, W_PAD*0.9, width=22)
 for j, sm in enumerate(HOOK):
-    place(music, bell(hz(sm+12), 1.4, 1.3), DROP1+0.10 + j*0.14, 0.17, pan=0.4 - j*0.26)
+    place(music, bell(hz(sm+12), 1.4, 1.3), DROP1+0.10 + j*0.14, W_PAD*0.17, pan=0.4 - j*0.26)
 tb = DROP1
 while tb < 5.5:
     k = int(round((tb-DROP1)/(BEAT/2)))
@@ -424,11 +431,11 @@ place_low(bass(0, 0.9), 15.1, 0.26, 'bass')
 # 8. дроп 2 — самый большой. Ширина и верх, а не один низ
 place_pre(sfx, S('suck', suck(0.42)), DROP2, 0.95, trim=2.00)
 place_low(S('sub_drop', sub_hit(72, 30, 0.48, 2.0)), DROP2, 1.05)
-place(music, stab(Dadd9, 1.5, cut=8000), DROP2, 0.92, width=20)
+place(music, stab(Dadd9, 1.5, cut=8000), DROP2, W_PAD*0.92, width=20)
 place_impact(sfx, 'impact_big', impact(0.8, 115, 1.4), DROP2, 1.05, width=10, bright=1.05)
 place(music, S('crash', crash(2.4)), DROP2, 0.62, pan=-0.2)
-place(music, shimmer([0, 4, 7, 11], 3.0), DROP2, 1.6, width=26)
-place(music, stab(Dadd9, 1.3, cut=8000), 16.45, 0.70, width=22)
+place(music, shimmer([0, 4, 7, 11], 3.0), DROP2, W_PAD*1.6, width=26)
+place(music, stab(Dadd9, 1.3, cut=8000), 16.45, W_PAD*0.70, width=22)
 place_low(S('sub_drop', sub_hit(66, 32, 0.40)), 16.45, 0.80)
 place_impact(sfx, 'impact_mid', impact(0.7, 135, 1.3), 16.45, 0.90, width=8, bright=0.8)
 place(music, pad([0, 4, 7, 14], 5.0, cut=2600), 16.5, W_PAD*0.40, width=24)
@@ -463,18 +470,18 @@ place(sfx, WH(1.3, 300, 4600, -0.9, 0.9), 21.05, 0.45)
 place(sfx, WH(0.9, 800, 10000, 0.8, -0.8), 21.90, 0.38)
 place_low(S('sub_drop', sub_hit(68, 32, 0.44, 1.7)), 22.30, 0.85)
 place_impact(sfx, 'impact_mid', impact(0.7, 145, 1.5), 22.30, 0.85, width=10, bright=0.6)
-place(music, stab(Dadd9, 1.8, cut=9000), 22.30, 0.72, width=20)
+place(music, stab(Dadd9, 1.8, cut=9000), 22.30, W_PAD*0.72, width=20)
 place(music, S('crash', crash(2.2)), 22.30, 0.32, pan=0.2)
-place(music, bell(hz(24), 2.6, 1.5), 22.34, 0.26)
+place(music, bell(hz(24), 2.6, 1.5), 22.34, W_PAD*0.26)
 place(sfx, S('twinkle', tick(0.09, 3400)), 22.95, 0.30, pan=0.5)
 
 # 11. энд-кард — мотив разрешается в мажор, хвост не обрезается
-place(music, pad([0, 4, 7, 11, 16], 3.2, cut=3000), 23.95, 0.46, width=26)
-place(music, shimmer([0, 4, 7, 11], 3.0), 23.95, 2.4, width=30)
-place_low(bass(0, 2.2), 23.95, 0.26)
-for j, sm in enumerate(HOOK_END):
-    place(music, bell(hz(sm+12), 2.6, 1.8), 24.0 + j*0.19, 0.30 - j*0.03, pan=-0.4 + j*0.27, width=12)
-    place(music, bell(hz(sm+24), 1.8, 1.8), 24.0 + j*0.19, 0.09, pan=0.4 - j*0.27)
+place(music, pad(END_CHORD, 3.2, base=BASE, cut=3000), 23.95, 0.46, width=26)
+place(music, shimmer(END_CHORD, 3.0, base=BASE), 23.95, 2.4, width=30)
+place_low(bass(END_CHORD[0] - 12, 2.2, base=BASE/2), 23.95, 0.26)
+for j, sm in enumerate(END_HOOK):
+    place(music, bell(hz(sm+12, BASE), 2.6, 1.8), 24.0 + j*0.19, 0.30 - j*0.03, pan=-0.4 + j*0.27, width=12)
+    place(music, bell(hz(sm+24, BASE), 1.8, 1.8), 24.0 + j*0.19, 0.09, pan=0.4 - j*0.27)
 place(sfx, WH(0.6, 400, 3200, -0.5, 0.5), 23.92, 0.33)
 place(music, S('crash', crash(2.6)), 23.98, 0.26, pan=0.25)
 
