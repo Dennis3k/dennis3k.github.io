@@ -63,6 +63,8 @@ HASBED = BED is not None
 # пэды уходят на подклад, суб-удары остаются — они ложатся под дропы трека
 W_RHY = 0.0 if HASBED else 1.0
 W_PAD = 0.30 if HASBED else 1.0
+BED_DB = -6.0        # уровень присланного трека относительно остального микса
+BED_DUCK_DB = -5.0   # насколько трек расступается под эффектами
 if HASBED: print('фоновый трек подключён: ритм-секция синтеза отключена')
 
 def S(slot, fallback):
@@ -396,7 +398,7 @@ for i, ch in enumerate(PROMPT):
     p = (i+1)/len(PROMPT)
     at = TYPE_START + (TYPE_END-TYPE_START)*(p**(1/0.94)) + float(_kr.uniform(-0.012, 0.012))
     sig = KEYS[(i//3) % len(KEYS)] if KEYS else S('tick_type', tick(0.045, 1900 + (i % 7)*150, 1.0))
-    place(sfx, sig, at, 0.30 + 0.08*float(_kr.random()), pan=-0.40 + 0.8*p)
+    place(sfx, sig, at, 0.92 + 0.16*float(_kr.random()), pan=-0.40 + 0.8*p)
 
 # 6. отправка
 place(sfx, WH(0.5, 600, 5600, -0.5, 0.5), 11.02, 0.60)
@@ -553,7 +555,11 @@ if HASBED:
     for c in (0, 1):
         BED[c] = shelf_hi(shelf_lo(peak(BED[c], 700, -2.0, 1.1), 110, 4.0), 9000, 3.5)
     BED *= 0.9/max(np.max(np.abs(BED)), 1e-9)
-    music = music + BED*0.92
+    # трек расступается под эффектами: иначе удары и щелчки приходится
+    # вытягивать громкостью, а это ломает динамику сцены
+    senv = follower(np.abs(sfx).max(axis=0)/max(np.max(np.abs(sfx)), 1e-9), atk=0.005, rel=0.20)
+    bduck = 1.0 - (1.0 - 10**(BED_DUCK_DB/20))*np.clip(senv*2.2, 0, 1)
+    music = music + BED*(10**(BED_DB/20))*bduck
 stem_music = (music + low*0.0)*d*0.85*fade
 stem_low = low*(0.55 + 0.45*d)*fade*(0.80 if HASBED else 0.50)
 stem_sfx = sfx*(0.6 + 0.4*d)*fade
