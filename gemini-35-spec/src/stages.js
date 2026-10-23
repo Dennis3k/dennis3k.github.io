@@ -163,3 +163,94 @@ export function streaks(ctx, L, cx, cy, p, { n = 48, seed = 21, color = [180, 21
   }
   ctx.restore();
 }
+
+/** Светлая студия вместо белого листа.
+ *
+ * Чистый #FFF читается как «фон не отрисовался»: нет ни горизонта, ни падения
+ * света, ни угла — глазу не за что зацепиться, и тёмный объект висит в пустоте.
+ * Здесь всё, что делает свет студийным: вертикальный градиент стены, световое
+ * пятно за объектом, мягкий переход стены в пол, цветовая подсветка по краям
+ * и виньетка. Ничего не статично — пятна медленно дышат. */
+export function lightStudio(ctx, L, t, {
+  key = [0.5, 0.44], floor = 1, horizon = 0.72, vig = 0.55, tint = 1, lift = 0,
+} = {}) {
+  const { W, H } = L;
+  const hzY = H * horizon;
+
+  // стена: холодный свет сверху, тон глубже к низу
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#DFE6F5');
+  g.addColorStop(0.34, '#EFF3FB');
+  g.addColorStop(0.72, '#E4EAF7');
+  g.addColorStop(1, '#C4D0E8');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  // световое пятно за объектом — оно и лепит объём
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  const kx = W * key[0], ky = H * key[1];
+  const kg = ctx.createRadialGradient(kx, ky, 0, kx, ky, Math.max(W, H) * 0.62);
+  kg.addColorStop(0, 'rgba(255,255,255,0.95)');
+  kg.addColorStop(0.42, 'rgba(255,255,255,0.45)');
+  kg.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = kg; ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+
+  // цвет по краям: синий слева сверху, розово-фиолетовый справа снизу
+  if (tint > 0) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'multiply';
+    const bl = ctx.createRadialGradient(W * (0.06 + 0.02 * Math.sin(t * 0.5)), H * 0.12, 0, W * 0.06, H * 0.12, Math.max(W, H) * 0.72);
+    bl.addColorStop(0, `rgba(196,212,246,${0.55 * tint})`);
+    bl.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = bl; ctx.fillRect(0, 0, W, H);
+    const pk = ctx.createRadialGradient(W * (0.95 - 0.02 * Math.cos(t * 0.42)), H * 0.86, 0, W * 0.95, H * 0.86, Math.max(W, H) * 0.70);
+    pk.addColorStop(0, `rgba(246,214,232,${0.52 * tint})`);
+    pk.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = pk; ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+
+  // переход стены в пол: мягкая дуга, а не линия
+  if (floor > 0) {
+    ctx.save();
+    const fg = ctx.createLinearGradient(0, hzY - H * 0.26, 0, H);
+    fg.addColorStop(0, 'rgba(168,184,220,0)');
+    fg.addColorStop(0.40, `rgba(168,184,220,${0.26 * floor})`);
+    fg.addColorStop(0.78, `rgba(150,168,210,${0.40 * floor})`);
+    fg.addColorStop(1, `rgba(132,152,198,${0.52 * floor})`);
+    ctx.fillStyle = fg; ctx.fillRect(0, hzY - H * 0.26, W, H - hzY + H * 0.26);
+    // отблеск на полу под ключевым светом
+    ctx.globalCompositeOperation = 'screen';
+    const sh = ctx.createRadialGradient(kx, hzY + H * 0.10, 0, kx, hzY + H * 0.10, Math.max(W, H) * 0.40);
+    sh.addColorStop(0, `rgba(255,255,255,${0.55 * floor})`);
+    sh.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sh;
+    ctx.beginPath(); ctx.ellipse(kx, hzY + H * 0.10, W * 0.55, H * 0.16, 0, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+
+  // углы: без них кадр остаётся плоским
+  if (vig > 0) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'multiply';
+    const vg = ctx.createRadialGradient(W / 2, H * 0.46, Math.min(W, H) * 0.30, W / 2, H * 0.46, Math.max(W, H) * 0.80);
+    vg.addColorStop(0, 'rgba(255,255,255,0)');
+    vg.addColorStop(0.62, `rgba(206,216,236,${0.30 * vig})`);
+    vg.addColorStop(1, `rgba(166,182,214,${0.58 * vig})`);
+    ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+
+  if (lift > 0) { ctx.fillStyle = `rgba(255,255,255,${lift})`; ctx.fillRect(0, 0, W, H); }
+}
+
+/** мягкая контактная тень под объектом — без неё он висит */
+export function contactShadow(ctx, x, y, rx, ry, a = 0.3, blur = 30, rot = 0) {
+  ctx.save();
+  ctx.globalAlpha = a;
+  ctx.filter = `blur(${blur}px)`;
+  ctx.fillStyle = '#54648C';
+  ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot, 0, TAU); ctx.fill();
+  ctx.restore();
+}

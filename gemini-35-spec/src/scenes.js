@@ -4,7 +4,7 @@ import {
   fitSize, glow, eOutExpo, eInExpo, eOutQuint, eOutQuart, eOutCubic, eInCubic,
   eInQuart, eInOutCubic, eInOutQuint, eOutBack, camEase, noShadow,
 } from './core.js';
-import { navyStage, whiteStage, dotGrid, bokeh, vignette, shockwave, streaks } from './stages.js';
+import { navyStage, whiteStage, lightStudio, contactShadow, dotGrid, bokeh, vignette, shockwave, streaks } from './stages.js';
 import {
   sparkle, sparklePath, gemGrad, blueGrad, googleG, iconGemini, wordGemini, twinkle,
   G_BLUE, G_RED, G_YEL, G_GRN,
@@ -136,7 +136,7 @@ export function S2(ctx, L, t) {
   const cx = lerp(W / 2, seatX, pm), cy = lerp(H / 2, seatY, pm);
 
   // white stage underneath
-  whiteStage(ctx, L, t, { amount: 1 });
+  lightStudio(ctx, L, t + 2.5, { key: [0.5, 0.46], floor: 0.55, horizon: 0.84, vig: 0.42, tint: 0.85 });
   ctx.save();
   ctx.globalCompositeOperation = 'screen';
   glow(ctx, seatX, seatY, Math.max(W, H) * 0.35, [120, 170, 255], 0.22 * pm);
@@ -225,13 +225,9 @@ export function S3(ctx, L, t) {
   const pOut = inv(1.35, 1.92, t);
 
   // stage: white → pale blue, blue bokeh in depth
-  const bgT = clamp(inv(0, 0.5, t));
-  ctx.save();
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, '#FFFFFF'); g.addColorStop(1, `rgb(${lerp(255, 222, bgT) | 0},${lerp(255, 236, bgT) | 0},255)`);
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  ctx.restore();
-  whiteStage(ctx, L, t + 3.5, { amount: 0.55, bg: 'rgba(0,0,0,0)' });
+  // приходим из белой вспышки S2 и за полсекунды проявляем студию
+  lightStudio(ctx, L, t + 3.5, { key: [0.5, 0.46], floor: 0.75, horizon: 0.80,
+    vig: 0.5, tint: 0.9, lift: Math.pow(clamp(1 - inv(0, 0.45, t)), 1.3) });
 
   const push = lerp(1, 1.12, smooth(inv(0.2, 1.3, t))) * lerp(1, 7.5, eInCubic(pOut));
   ctx.save();
@@ -286,7 +282,11 @@ export function S4(ctx, L, t) {
   const bloom = clamp(inv(0.95, 1.30, t));
   const dive = inv(1.28, 1.98, t);
 
-  whiteStage(ctx, L, t + 5.5, { amount: 0.9 });
+  ctx.save();
+  // фон тоже едет на нырке, иначе камера «приближается» по плоской картинке
+  cam(ctx, W / 2, H * 0.5, 1 + (lerp(1, 22, eInCubic(inv(1.28, 1.98, t))) - 1) * 0.10);
+  lightStudio(ctx, L, t + 5.5, { key: [0.5, 0.40], floor: 1, horizon: 0.74, vig: 0.6 });
+  ctx.restore();
 
   const bodyH = L.vert ? H * 0.72 : H * 0.88;
   const px = W / 2, py = H * (L.vert ? 0.52 : 0.55);
@@ -301,7 +301,8 @@ export function S4(ctx, L, t) {
   const float = Math.sin(t * 1.6) * 6 * u * (1 - dive);
   const yNow = lerp(H + bodyH * 0.65, py, rise) + float;
   const rot = lerp(0.06, 0, eOutQuint(inv(0.02, 0.72, t))) + Math.sin(t * 1.1) * 0.004;
-  phone(ctx, px, yNow, bodyH, { rot, shadowA: 0.28 * rise, alpha: 1 }, (c, w, h) => {
+  contactShadow(ctx, px, yNow + bodyH * 0.50, bodyH * 0.24, bodyH * 0.030, 0.34 * rise, bodyH * 0.045, rot);
+  phone(ctx, px, yNow, bodyH, { rot, shadowA: 0.45 * rise, alpha: 1 }, (c, w, h) => {
     homeScreen(c, w, h, t, { geminiBloom: bloom });
   });
   ctx.restore();
@@ -643,20 +644,8 @@ export function S8(ctx, L, t) {
 export function S9(ctx, L, t) {
   const { W, H, u, vert } = L;
   const settle = inv(0, 0.28, t);
-  // Белая сцена — не белый лист. Пастель заводится до прихода телефонов, иначе
-  // первые полсекунды кадр читается как неотрисованный фон, а не как студия.
-  whiteStage(ctx, L, t + 11.6, { amount: 1.15, bg: '#F7F8FC' });
-  // мягкий горизонт: верх чуть холоднее, низ — плоскость, на которой стоят телефоны
-  ctx.save();
-  const hz0 = H * (vert ? 0.70 : 0.74);
-  const fg = ctx.createLinearGradient(0, hz0 - H * 0.22, 0, H);
-  fg.addColorStop(0, 'rgba(214,224,245,0)');
-  fg.addColorStop(0.45, 'rgba(206,217,242,0.30)');
-  fg.addColorStop(1, 'rgba(176,190,224,0.52)');
-  ctx.fillStyle = fg; ctx.fillRect(0, hz0 - H * 0.22, W, H - hz0 + H * 0.22);
-  ctx.globalCompositeOperation = 'screen';
-  glow(ctx, W * 0.5, hz0 - H * 0.10, Math.max(W, H) * 0.55, [255, 255, 255], 0.55);
-  ctx.restore();
+  lightStudio(ctx, L, t + 12.75, { key: [0.5, 0.42], floor: 1,
+    horizon: vert ? 0.76 : 0.78, vig: 0.6 });
 
   const bodyH = vert ? H * 0.355 : H * 0.70;
   const slots = vert
@@ -678,17 +667,10 @@ export function S9(ctx, L, t) {
     const x = W / 2 + s.x * slide;
     const y = lerp(H + bodyH * 0.7, s.y, rise) + Math.sin(t * 1.3 + i) * 5 * u;
     const rot = lerp(i === 1 ? 0 : (i === 0 ? -0.10 : 0.10), i === 0 ? -0.045 : i === 2 ? 0.045 : 0, slide) + Math.sin(t * 0.9 + i) * 0.004;
-    // контактная тень под корпусом + короткое отражение: без них телефоны висят
     const bw = bodyH * s.s * 0.462;
-    ctx.save();
-    ctx.globalAlpha = 0.30 * rise;
-    ctx.filter = `blur(${bodyH * 0.045}px)`;
-    ctx.fillStyle = '#5A6B92';
-    ctx.beginPath();
-    ctx.ellipse(x, y + bodyH * s.s * 0.52, bw * 0.78, bodyH * s.s * 0.035, rot, 0, TAU);
-    ctx.fill();
-    ctx.restore();
-    phone(ctx, x, y, bodyH * s.s, { rot, shadowA: 0.42 * rise }, (c, w, h) => {
+    contactShadow(ctx, x, y + bodyH * s.s * 0.52, bw * 0.80, bodyH * s.s * 0.034,
+                  0.34 * rise, bodyH * 0.040, rot);
+    phone(ctx, x, y, bodyH * s.s, { rot, shadowA: 0.44 * rise }, (c, w, h) => {
       geminiApp(c, w, h, t, { answers: [FILMS[i]], answerIn: open, chips: 0, promptText: '', magenta: 0.4 });
     });
     // отражение сюда не ставится: под наклонённым корпусом оно читается
@@ -970,7 +952,7 @@ export function S12(ctx, L, t) {
 export function S13(ctx, L, t) {
   const { W, H, u } = L;
   const abs = t + 24.0;
-  whiteStage(ctx, L, abs, { amount: 0.75 });
+  lightStudio(ctx, L, abs, { key: [0.5, 0.44], floor: 0.40, horizon: 0.86, vig: 0.45, tint: 0.8 });
   const inP = smooth(inv(0.06, 0.55, t));
   const push = lerp(1.04, 1.0, camEase(inv(0, 1.4, t))) * lerp(1, 1.02, camEase(inv(1.2, 2.0, t)));
   ctx.save();
@@ -1008,13 +990,13 @@ export function S13(ctx, L, t) {
   // disclaimer
   const dp = smooth(inv(0.8, 1.4, t));
   if (dp > 0) {
-    ctx.save(); ctx.globalAlpha = dp;
+    ctx.save(); ctx.globalAlpha = dp * 0.95;
     const dTxt = 'Spec work for portfolio purposes only. Not affiliated with, sponsored or endorsed by Google LLC.';
     const dCap = Math.min(W, H) * 0.021;
     const ds = Math.min(dCap, fitSize(ctx, dTxt, W * 0.86, 450, dCap, 0));
     font(ctx, ds, 450, 0);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(11,14,24,0.58)';
+    ctx.fillStyle = 'rgba(11,14,24,0.72)';
     ctx.fillText(dTxt, W / 2, H * 0.90);
     ctx.restore();
   }
