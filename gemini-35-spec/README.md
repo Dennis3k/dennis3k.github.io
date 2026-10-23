@@ -4,9 +4,12 @@ A 24 s + 2 s end-card film at 30 fps, delivered in **16:9 (1920×1080)** and a r
 **9:16 (1080×1920) re-layout** — not a crop. Every frame is drawn by JavaScript into
 a canvas: no stock footage, no bitmaps, no After Effects project.
 
-The soundtrack is synthesised by `tools/score.py`, with no samples, and that holds
-for as long as `assets/sfx` is empty. Drop library files in and the named slots take
-them over, so check what is actually in the mix before repeating the claim.
+The score is synthesised by `tools/score.py`. The effects in the delivered mix are
+not: 17 of the 18 named slots are filled from libraries (Pixabay, and Kenney's CC0
+interface pack), prepared by `tools/sfx_prep.py` and loaded by `tools/sfxlib.py`.
+`assets/sfx` is gitignored, so a fresh clone rebuilds the all-synthesised version
+instead — which is the right default, but means the committed mp4s and the ones you
+would render are not the same mix.
 
 > Spec work for portfolio purposes only. Not affiliated with, sponsored or endorsed by Google LLC.
 
