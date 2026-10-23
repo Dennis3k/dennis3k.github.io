@@ -12,8 +12,10 @@ v2. Что изменилось против первой версии и поч
   • у музыки не было ни одной мелодии. Теперь есть мотив из четырёх нот,
     который приходит на искре и возвращается на энд-карде.
 """
-import json, math, sys, wave
+import json, math, os, sys, wave
 import numpy as np
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import sfxlib
 
 SR = 48000
 DUR = 26.0
@@ -37,6 +39,23 @@ PROMPT = "Recommend me a movie for tonight"
 
 rng = np.random.default_rng(7)
 def noise(n): return rng.standard_normal(n)
+
+# ── готовые сэмплы: если слот заполнен, он выигрывает у синтеза ────────────
+SFXLIB = sfxlib.load(verbose=True)
+if SFXLIB:
+    print(f"сэмплов подключено: {len(SFXLIB)}/{len(sfxlib.SLOTS)}")
+
+def S(slot, fallback):
+    x = SFXLIB.get(slot)
+    return x if x is not None else fallback
+
+def WH(dur, f0, f1, p0, p1):
+    """вуш: сэмпл едет по панораме, синтез уже стереофонический"""
+    slot = 'whoosh_short' if dur < 0.6 else 'whoosh_long'
+    x = SFXLIB.get(slot)
+    if x is not None:
+        return sfxlib.pan_sweep(x, p0, p1)
+    return whoosh_st(dur, f0, f1, p0, p1)
 
 # ── базовое ────────────────────────────────────────────────────────────────
 def exp_env(n, tau): return np.exp(-np.arange(n) / (tau * SR))
@@ -261,24 +280,24 @@ place(music, riser(2.3, 110, 2900, 0.26, note=0), 0.0, 1.0)
 place(music, shimmer([0, 7], 2.4), 0.1, 0.32, width=18)
 for i, s in enumerate(SLAMS):
     g = 1.0 if i < 3 else 1.3
-    place(sfx, suck(0.28), s-0.28, 0.55*g)
-    place(sfx, impact(0.6, 150+i*18, 0.9+0.12*i), s, 0.85*g, pan=(-0.12, 0.12, -0.08, 0)[i], width=6)
-    place_low(sub_hit(60, 32, 0.40), s, 0.72*g)
-    place(sfx, whoosh_st(0.34, 400, 3000, -0.6, 0.6), s-0.20, 0.30)
-place(music, crash(1.6), SLAMS[3], 0.18)
+    place(sfx, S('suck', suck(0.28)), s-0.28, 0.55*g)
+    place(sfx, S(f'slam_{i+1}', impact(0.6, 150+i*18, 0.9+0.12*i)), s, 0.85*g, pan=(-0.12, 0.12, -0.08, 0)[i], width=6)
+    place_low(S('sub_drop', sub_hit(60, 32, 0.40)), s, 0.72*g)
+    place(sfx, WH(0.34, 400, 3000, -0.6, 0.6), s-0.20, 0.30)
+place(music, S('crash', crash(1.6)), SLAMS[3], 0.18)
 
 # 2. схлопывание в искру — здесь впервые звучит мотив
-place(sfx, whoosh_st(0.55, 500, 5200, 0.7, -0.7), 2.42, 0.55)
-place(sfx, click(0.22, 900), 2.74, 0.32)
+place(sfx, WH(0.55, 500, 5200, 0.7, -0.7), 2.42, 0.55)
+place(sfx, S('click_ui', click(0.22, 900)), 2.74, 0.32)
 for j, sm in enumerate(HOOK):
     place(music, bell(hz(sm+12), 1.8), 2.80 + j*0.16, 0.26 - j*0.02, pan=-0.35 + j*0.23, width=10)
 
 # 3. дроп 1 — несёт широкий яркий аккорд, суб только подпирает
-place(sfx, suck(0.34), DROP1-0.34, 0.7)
-place_low(sub_hit(70, 32, 0.46, 1.8), DROP1, 0.70)
+place(sfx, S('suck', suck(0.34)), DROP1-0.34, 0.7)
+place_low(S('sub_drop', sub_hit(70, 32, 0.46, 1.8)), DROP1, 0.70)
 place(music, stab(Dm, 1.4), DROP1, 0.80, width=16)
-place(sfx, impact(0.7, 130, 1.25), DROP1, 0.95, width=8)
-place(music, crash(2.0), DROP1, 0.30, pan=0.15)
+place(sfx, S('impact_mid', impact(0.7, 130, 1.25)), DROP1, 0.95, width=8)
+place(music, S('crash', crash(2.0)), DROP1, 0.30, pan=0.15)
 place(music, pad([0, 7, 12, 16], 2.4, cut=2000), DROP1+0.05, 0.40, width=20)
 place(music, shimmer([0, 7, 12], 2.2), DROP1+0.05, 0.9, width=22)
 for j, sm in enumerate(HOOK):
@@ -290,7 +309,7 @@ while tb < 5.5:
     tb += BEAT/2
 for j, sm in enumerate([0, 0, -2, 3]):
     place_low(bass(sm, 0.46), DROP1 + j*BEAT, 0.34)
-place(sfx, whoosh_st(0.75, 600, 7000, -0.8, 0.8), 4.85, 0.75)
+place(sfx, WH(0.75, 600, 7000, -0.8, 0.8), 4.85, 0.75)
 
 # 4. приложение — басовая линия движется, арпеджио раскинуто по панораме
 place(music, pad([-12, -9, -5, -2], 6.4, cut=900, hpf=100), 5.5, 0.52, width=24)
@@ -305,9 +324,9 @@ while tb < 12.0:
         place_low(kick(), tb, 0.30)
     place(music, hat(dur=0.07), tb + BEAT/4, 0.18, pan=0.4 if k % 2 else -0.4)
     k += 1; tb += BEAT/2
-place(sfx, whoosh_st(0.6, 300, 2400, -0.7, 0.2), 5.52, 0.45)
-place(sfx, whoosh_st(0.7, 700, 8000, 0.3, -0.9), 6.95, 0.70)
-place(sfx, impact(0.4, 220, 1.5, body=0.5), 7.50, 0.50)
+place(sfx, WH(0.6, 300, 2400, -0.7, 0.2), 5.52, 0.45)
+place(sfx, WH(0.7, 700, 8000, 0.3, -0.9), 6.95, 0.70)
+place(sfx, S('impact_soft', impact(0.4, 220, 1.5, body=0.5)), 7.50, 0.50)
 
 # 5. набор текста — тики с разбросом по высоте и панораме, иначе это пулемёт
 for i, ch in enumerate(PROMPT):
@@ -315,45 +334,45 @@ for i, ch in enumerate(PROMPT):
     p = (i+1)/len(PROMPT)
     at = TYPE_START + (TYPE_END-TYPE_START)*(p**(1/0.94))
     f = 1900 + (hash(ch) % 7)*150
-    place(sfx, tick(0.045, f, 1.0), at, 0.17 + 0.05*((i % 3) == 0), pan=-0.45 + 0.9*p)
+    place(sfx, S('tick_type', tick(0.045, f, 1.0)), at, 0.17 + 0.05*((i % 3) == 0), pan=-0.45 + 0.9*p)
 
 # 6. отправка
-place(sfx, whoosh_st(0.5, 600, 5600, -0.5, 0.5), 11.02, 0.60)
-place(sfx, click(0.14, 1500), 11.52, 0.45)
-place(sfx, click(0.10, 1800), 12.36, 0.40)
-place(sfx, click(0.16, 900), 12.50, 0.70)
-place(sfx, impact(0.5, 160, 1.6, body=0.6), 12.52, 0.55, width=5)
-place(sfx, whoosh_st(0.8, 900, 9000, 0.0, 0.0), 12.55, 0.80)
+place(sfx, WH(0.5, 600, 5600, -0.5, 0.5), 11.02, 0.60)
+place(sfx, S('click_ui', click(0.14, 1500)), 11.52, 0.45)
+place(sfx, S('click_ui', click(0.10, 1800)), 12.36, 0.40)
+place(sfx, S('tap', click(0.16, 900)), 12.50, 0.70)
+place(sfx, S('impact_soft', impact(0.5, 160, 1.6, body=0.6)), 12.52, 0.55, width=5)
+place(sfx, WH(0.8, 900, 9000, 0.0, 0.0), 12.55, 0.80)
 
 # 7. билд — и тишина перед дропом: без паузы дроп не читается как дроп
-place(music, riser(3.05, 190, 7000, 0.44, note=0), 12.78, 1.0)
+place(music, S('riser_build', riser(3.05, 190, 7000, 0.44, note=0)), 12.78, 1.0)
 place(music, pad([0, 7, 12], 3.0, cut=1300), 12.80, 0.26, width=18)
-place(music, crash(1.9, rev=True), 15.0, 0.42)
+place(music, S('crash_rev', crash(1.9, rev=True)), 15.0, 0.42)
 tb, step = 12.9, BEAT
 while tb < 15.92:
     place(music, hat(0.07), tb, 0.48, pan=-0.35 if int(tb*7) % 2 else 0.35)
     step = max(BEAT/8, step*0.88); tb += step
 for j in range(3):
-    place(sfx, whoosh_st(0.45, 400, 3600, -0.8 + j*0.5, 0.8 - j*0.4), 12.95 + j*0.42, 0.28)
+    place(sfx, WH(0.45, 400, 3600, -0.8 + j*0.5, 0.8 - j*0.4), 12.95 + j*0.42, 0.28)
 place_low(bass(0, 0.9), 15.1, 0.26)
 # 15.92–16.15 — дыра: ничего не играет
 
 # 8. дроп 2 — самый большой. Ширина и верх, а не один низ
-place(sfx, suck(0.42), DROP2-0.42, 0.85)
-place_low(sub_hit(72, 30, 0.48, 2.0), DROP2, 0.60)
+place(sfx, S('suck', suck(0.42)), DROP2-0.42, 0.85)
+place_low(S('sub_drop', sub_hit(72, 30, 0.48, 2.0)), DROP2, 0.60)
 place(music, stab(Dadd9, 1.5, cut=8000), DROP2, 0.92, width=20)
-place(sfx, impact(0.8, 115, 1.4), DROP2, 1.0, width=10)
-place(music, crash(2.4), DROP2, 0.62, pan=-0.2)
+place(sfx, S('impact_big', impact(0.8, 115, 1.4)), DROP2, 1.0, width=10)
+place(music, S('crash', crash(2.4)), DROP2, 0.62, pan=-0.2)
 place(music, shimmer([0, 4, 7, 11], 3.0), DROP2, 1.6, width=26)
 place(music, stab(Dadd9, 1.3, cut=8000), 16.45, 0.70, width=22)
-place_low(sub_hit(66, 32, 0.40), 16.45, 0.52)
-place(sfx, impact(0.7, 135, 1.3), 16.45, 0.90, width=8)
+place_low(S('sub_drop', sub_hit(66, 32, 0.40)), 16.45, 0.52)
+place(sfx, S('impact_mid', impact(0.7, 135, 1.3)), 16.45, 0.90, width=8)
 place(music, pad([0, 4, 7, 14], 5.0, cut=2600), 16.5, 0.40, width=24)
 for j, sm in enumerate(HOOK):
     place(music, bell(hz(sm+12), 2.0, 1.4), 16.55 + j*0.25, 0.26, pan=-0.45 + j*0.3, width=12)
 for w in (17.35, 17.62):
-    place(sfx, impact(0.45, 195, 1.2, body=0.6), w, 0.48, width=6)
-    place_low(sub_hit(58, 36, 0.30), w, 0.30)
+    place(sfx, S('impact_soft', impact(0.45, 195, 1.2, body=0.6)), w, 0.48, width=6)
+    place_low(S('sub_drop', sub_hit(58, 36, 0.30)), w, 0.30)
 k = 0; tb = DROP2
 bl2 = [0, 0, 4, 4, -2, -2, 3, 3]
 while tb < 21.0:
@@ -368,22 +387,22 @@ while tb < 21.0:
     k += 1; tb += BEAT/2
 
 # 9. experience
-place(sfx, whoosh_st(0.7, 400, 3800, -0.8, 0.4), 18.80, 0.50)
-place(sfx, whoosh_st(0.7, 700, 5800, 0.6, -0.5), 18.96, 0.45)
+place(sfx, WH(0.7, 400, 3800, -0.8, 0.4), 18.80, 0.50)
+place(sfx, WH(0.7, 700, 5800, 0.6, -0.5), 18.96, 0.45)
 for j, sm in enumerate(HOOK):
     place(music, bell(hz(sm+12), 1.6), 19.30 + j*0.13, 0.20, pan=0.4 - j*0.27)
 
 # 10. орб и логотип
 place(music, pad([-12, -5, 0], 2.8, cut=1200), 21.0, 0.36, width=22)
 place(music, shimmer([0, 7, 12], 3.0), 21.0, 0.52, width=28)
-place(sfx, whoosh_st(1.3, 300, 4600, -0.9, 0.9), 21.05, 0.45)
-place(sfx, whoosh_st(0.9, 800, 10000, 0.8, -0.8), 21.90, 0.50)
-place_low(sub_hit(68, 32, 0.44, 1.7), 22.30, 0.58)
-place(sfx, impact(0.7, 145, 1.5), 22.30, 0.85, width=10)
+place(sfx, WH(1.3, 300, 4600, -0.9, 0.9), 21.05, 0.45)
+place(sfx, WH(0.9, 800, 10000, 0.8, -0.8), 21.90, 0.50)
+place_low(S('sub_drop', sub_hit(68, 32, 0.44, 1.7)), 22.30, 0.58)
+place(sfx, S('impact_mid', impact(0.7, 145, 1.5)), 22.30, 0.85, width=10)
 place(music, stab(Dadd9, 1.8, cut=9000), 22.30, 0.72, width=20)
-place(music, crash(2.2), 22.30, 0.32, pan=0.2)
+place(music, S('crash', crash(2.2)), 22.30, 0.32, pan=0.2)
 place(music, bell(hz(24), 2.6, 1.5), 22.34, 0.26)
-place(sfx, tick(0.09, 3400), 22.95, 0.30, pan=0.5)
+place(sfx, S('twinkle', tick(0.09, 3400)), 22.95, 0.30, pan=0.5)
 
 # 11. энд-кард — мотив разрешается в мажор, хвост не обрезается
 place(music, pad([0, 4, 7, 11, 16], 3.2, cut=3000), 23.95, 0.46, width=26)
@@ -392,8 +411,8 @@ place_low(bass(0, 2.2), 23.95, 0.26)
 for j, sm in enumerate(HOOK_END):
     place(music, bell(hz(sm+12), 2.6, 1.8), 24.0 + j*0.19, 0.30 - j*0.03, pan=-0.4 + j*0.27, width=12)
     place(music, bell(hz(sm+24), 1.8, 1.8), 24.0 + j*0.19, 0.09, pan=0.4 - j*0.27)
-place(sfx, whoosh_st(0.6, 400, 3200, -0.5, 0.5), 23.92, 0.33)
-place(music, crash(2.6), 23.98, 0.26, pan=0.25)
+place(sfx, WH(0.6, 400, 3200, -0.5, 0.5), 23.92, 0.33)
+place(music, S('crash', crash(2.6)), 23.98, 0.26, pan=0.25)
 
 # ═══ пространство ══════════════════════════════════════════════════════════
 def diffuse(x, seed):

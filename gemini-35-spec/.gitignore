@@ -3,3 +3,8 @@ out/stills/
 out/render_*.log
 # regenerated deterministically by tools/score.py in ~15 s
 out/*.wav
+
+# звуковые библиотеки не коммитим: лицензия Epidemic Sound запрещает
+# распространять сами файлы, а репозиторий публичный
+assets/sfx/*
+!assets/sfx/README.md
