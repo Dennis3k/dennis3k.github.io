@@ -99,14 +99,28 @@ lighter tension under the app, a build, the biggest drop on "All answered.", a h
 on the G, the last chord ringing under the end card. Every slam gets a suck + impact,
 every move a whoosh, every typed character a tick, every UI action a click.
 
-Measured, not asserted:
+There is a four-note motif that arrives on the sparkle and resolves into the major
+on the end card, so the film has something to remember it by.
 
-- master **−15.3 LUFS integrated, −1.00 dBTP** (the bed sits ~1.3 dB under the −14
-  target on purpose: the voice sits 9 dB over everything and will carry it there)
-- a **−9 dB duck** is already cut under every word in the map, 35 ms in, 220 ms out
-- `out/stem_music.wav` + `out/stem_sfx.wav` **null against `out/score.wav` at
-  −240 dBFS** — the same master-chain gain curve is applied to each stem rather than
-  re-processed, so an editable project sums exactly to the delivered mix
+Measured, not asserted (`python3 -I tools/audio_report.py out/score.wav`):
+
+- master **−16.2 LUFS integrated, −1.00 dBTP**. The bed sits under the −14 target on
+  purpose: the voice runs 9 dB over everything and carries the integrated figure up.
+  The sections now span 4 dB of RMS rather than 2.8, so the drops have somewhere to
+  arrive from.
+- **stereo width 0.71** (channel correlation above 300 Hz; 1.0 would be mono). The
+  bass stays mono and the reverb runs a different reflection grid per channel.
+- A-weighted band balance at the big drop: **18 / 22 / 32 / 14 / 13 %** across
+  low · low-mid · mid · high-mid · air. The first pass put 87 % of that moment below
+  120 Hz, which is how a climax turns into a dull thud.
+- a **−9 dB duck** is already cut under every word in the map, 35 ms in, 220 ms out,
+  and the music bus is sidechained off the kick and sub on top of that
+- `stem_music` + `stem_low` + `stem_sfx` **null against `out/score.wav` at −240 dBFS**
+  — the same master-chain gain curve is applied to each stem rather than re-processed,
+  so an editable project sums exactly to the delivered mix
+
+What no measurement settles is whether it sounds good. That needs ears, and the
+A/B against the first pass is in `out/ab_v1_staryi.m4a` and `out/ab_v2_novyi.m4a`.
 
 ## Deviations from the brief, and why
 
@@ -137,6 +151,7 @@ src/main.js         scene routing + the sub-frame motion-blur accumulator
 tools/capture.mjs   frame-accurate render -> x264
 tools/shot.mjs      stills at arbitrary timecodes
 tools/score.py      the entire soundtrack, synthesised
+tools/audio_report.py  A-weighted band balance and stereo width per section
 tools/audit.mjs     word -> frame table, cut list, blur budget
 tools/mux.sh        lay the score under a silent master
 ```
