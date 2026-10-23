@@ -643,7 +643,20 @@ export function S8(ctx, L, t) {
 export function S9(ctx, L, t) {
   const { W, H, u, vert } = L;
   const settle = inv(0, 0.28, t);
-  whiteStage(ctx, L, t + 12.75, { amount: 0.95 });
+  // Белая сцена — не белый лист. Пастель заводится до прихода телефонов, иначе
+  // первые полсекунды кадр читается как неотрисованный фон, а не как студия.
+  whiteStage(ctx, L, t + 11.6, { amount: 1.15, bg: '#F7F8FC' });
+  // мягкий горизонт: верх чуть холоднее, низ — плоскость, на которой стоят телефоны
+  ctx.save();
+  const hz0 = H * (vert ? 0.70 : 0.74);
+  const fg = ctx.createLinearGradient(0, hz0 - H * 0.22, 0, H);
+  fg.addColorStop(0, 'rgba(214,224,245,0)');
+  fg.addColorStop(0.45, 'rgba(206,217,242,0.30)');
+  fg.addColorStop(1, 'rgba(176,190,224,0.52)');
+  ctx.fillStyle = fg; ctx.fillRect(0, hz0 - H * 0.22, W, H - hz0 + H * 0.22);
+  ctx.globalCompositeOperation = 'screen';
+  glow(ctx, W * 0.5, hz0 - H * 0.10, Math.max(W, H) * 0.55, [255, 255, 255], 0.55);
+  ctx.restore();
 
   const bodyH = vert ? H * 0.355 : H * 0.70;
   const slots = vert
@@ -665,9 +678,21 @@ export function S9(ctx, L, t) {
     const x = W / 2 + s.x * slide;
     const y = lerp(H + bodyH * 0.7, s.y, rise) + Math.sin(t * 1.3 + i) * 5 * u;
     const rot = lerp(i === 1 ? 0 : (i === 0 ? -0.10 : 0.10), i === 0 ? -0.045 : i === 2 ? 0.045 : 0, slide) + Math.sin(t * 0.9 + i) * 0.004;
-    phone(ctx, x, y, bodyH * s.s, { rot, shadowA: 0.22 * rise }, (c, w, h) => {
+    // контактная тень под корпусом + короткое отражение: без них телефоны висят
+    const bw = bodyH * s.s * 0.462;
+    ctx.save();
+    ctx.globalAlpha = 0.30 * rise;
+    ctx.filter = `blur(${bodyH * 0.045}px)`;
+    ctx.fillStyle = '#5A6B92';
+    ctx.beginPath();
+    ctx.ellipse(x, y + bodyH * s.s * 0.52, bw * 0.78, bodyH * s.s * 0.035, rot, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+    phone(ctx, x, y, bodyH * s.s, { rot, shadowA: 0.42 * rise }, (c, w, h) => {
       geminiApp(c, w, h, t, { answers: [FILMS[i]], answerIn: open, chips: 0, promptText: '', magenta: 0.4 });
     });
+    // отражение сюда не ставится: под наклонённым корпусом оно читается
+    // размытым пятном, а не отражением. Пол держат горизонт и контактная тень.
   });
   ctx.restore();
 
