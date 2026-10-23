@@ -973,7 +973,7 @@ export function S13(ctx, L, t) {
   const s2 = s * 0.22;
   font(ctx, s2, 500, s2 * 0.08);
   ctx.fillStyle = 'rgba(11,14,24,0.55)';
-  ctx.fillText('AI MOTION  ·  BUILT ENTIRELY IN CODE', W / 2, cy + s * 0.72);
+  ctx.fillText('AI MOTION  ·  EVERY FRAME DRAWN IN CODE', W / 2, cy + s * 0.72);
   ctx.restore();
 
   // thin gemini rule, wipes in

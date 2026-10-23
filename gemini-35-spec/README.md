@@ -1,9 +1,12 @@
-# Gemini 3.5 — spec motion ad, built entirely in code
+# Gemini 3.5 — spec motion ad, every frame drawn in code
 
 A 24 s + 2 s end-card film at 30 fps, delivered in **16:9 (1920×1080)** and a real
 **9:16 (1080×1920) re-layout** — not a crop. Every frame is drawn by JavaScript into
-a canvas: no stock footage, no bitmaps, no After Effects project. The soundtrack is
-synthesised by `tools/score.py` — no samples either.
+a canvas: no stock footage, no bitmaps, no After Effects project.
+
+The soundtrack is synthesised by `tools/score.py`, with no samples, and that holds
+for as long as `assets/sfx` is empty. Drop library files in and the named slots take
+them over, so check what is actually in the mix before repeating the claim.
 
 > Spec work for portfolio purposes only. Not affiliated with, sponsored or endorsed by Google LLC.
 
