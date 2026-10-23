@@ -3,6 +3,8 @@ out/stills/
 out/render_*.log
 # regenerated deterministically by tools/score.py in ~15 s
 out/*.wav
+# A/B compares, likewise regenerated from the wavs
+out/*.m4a
 
 # звуковые библиотеки не коммитим: лицензия Epidemic Sound запрещает
 # распространять сами файлы, а репозиторий публичный
