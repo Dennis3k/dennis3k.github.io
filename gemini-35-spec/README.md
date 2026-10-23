@@ -4,9 +4,13 @@ A 24 s + 2 s end-card film at 30 fps, delivered in **16:9 (1920×1080)** and a r
 **9:16 (1080×1920) re-layout** — not a crop. Every frame is drawn by JavaScript into
 a canvas: no stock footage, no bitmaps, no After Effects project.
 
-The score is synthesised by `tools/score.py`. The effects in the delivered mix are
-not: 17 of the 18 named slots are filled from libraries (Pixabay, and Kenney's CC0
-interface pack), prepared by `tools/sfx_prep.py` and loaded by `tools/sfxlib.py`.
+Neither the score nor the effects in the delivered mix are synthesised any more.
+A supplied track carries the music and 17 of the 18 effect slots are filled from
+libraries (Pixabay, and Kenney's CC0 interface pack). `tools/sfx_prep.py` prepares
+them — including cutting the track into two pieces so that its own drop lands on
+both of the film's, at 3.62 s and 16.15 s — and `tools/sfxlib.py` loads them.
+`tools/score.py` still writes everything the libraries do not cover, and mutes its
+own drum kit, bass and arpeggio when a bed is present so the two do not stack.
 `assets/sfx` is gitignored, so a fresh clone rebuilds the all-synthesised version
 instead — which is the right default, but means the committed mp4s and the ones you
 would render are not the same mix.

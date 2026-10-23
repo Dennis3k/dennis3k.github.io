@@ -102,6 +102,60 @@ SRC = {
     'slam_4':      ('universfield',       lambda x: norm(head(respeed(x, 1.34), 0.95, 0.38), 0.80)),
 }
 
+def cut_keys(path, times, dur=0.17):
+    """Из записи набора вынимаются отдельные нажатия. Целиком её использовать
+    нельзя: там 55 ударов за 22 с в своём ритме, а печать в ролике идёт по
+    карте тайминга."""
+    x = decode(path)
+    for i, t in enumerate(times, 1):
+        a = max(0, int((t - 0.02)*SR))
+        y = x[a:a + int(dur*SR)].copy()
+        y = fade_out(fade_in(y, 0.002), 0.06)
+        write(f'key_{i}', y)
+
+def prep_bed(path, out_name='music_bed.wav'):
+    """Фоновый трек режется на два куска так, чтобы его собственный дроп
+    дважды пришёлся на дропы ролика — на 3.62 и на 16.15. Шов на 12.75
+    прикрыт вушем и белой вспышкой, и просадка энергии там по монтажу нужна."""
+    r = subprocess.run(['ffmpeg', '-v', 'error', '-i', path, '-ar', str(SR), '-ac', '2', '-f', 'f32le', '-'],
+                       capture_output=True)
+    st = np.frombuffer(r.stdout, dtype='<f4').astype(np.float64).reshape(-1, 2).T
+    TRACK_DROP = 10.293        # измерено по спектральному потоку
+    FILM = 26.0
+    n = int(FILM*SR)
+    out = np.zeros((2, n))
+    k = int(0.07*SR)                      # перекрытие на шве
+    def grab(film_a, film_b, drop_at, fi=0, fo=0):
+        """кусок трека, посаженный так, чтобы его дроп попал на drop_at"""
+        off = drop_at - TRACK_DROP
+        a, b = int(film_a*SR), int(film_b*SR)
+        sa = max(0, int((film_a - off)*SR))
+        seg = st[:, sa:sa + (b - a)].copy()
+        if seg.shape[1] < b - a:
+            seg = np.pad(seg, ((0, 0), (0, b - a - seg.shape[1])))
+        if fi: seg[:, :fi] *= np.linspace(0, 1, fi)[None, :]
+        if fo: seg[:, -fo:] *= np.linspace(1, 0, fo)[None, :]
+        return a, seg
+    c = int(12.75*SR)
+    # куски перекрываются на 70 мс и складываются — настоящий кроссфейд,
+    # а не две встречные затухалки, между которыми была бы дыра
+    a1, s1 = grab(0.0, 12.75 + 0.07, 3.62, fo=k)
+    a2, s2 = grab(12.75 - 0.07, FILM, 16.15, fi=k)
+    out[:, a1:a1+s1.shape[1]] += s1[:, :n-a1]
+    out[:, a2:a2+s2.shape[1]] += s2[:, :n-a2]
+    # энд-кард: трек уводится, разрешение даёт синтезированный аккорд
+    f0, f1 = int(23.9*SR), int(25.6*SR)
+    out[:, f0:f1] *= np.linspace(1, 0, f1-f0)[None, :]
+    out[:, f1:] = 0
+    out[:, :int(0.05*SR)] *= np.linspace(0, 1, int(0.05*SR))
+    out = out/max(np.max(np.abs(out)), 1e-9)*0.9
+    path_out = os.path.join(OUT, out_name)
+    p = subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(SR), '-ac', '2',
+                        '-i', '-', '-c:a', 'pcm_s24le', path_out],
+                       input=out.T.astype('<f4').tobytes(), capture_output=True)
+    if p.returncode: raise RuntimeError(p.stderr.decode()[:160])
+    print(f'  music_bed     {out.shape[1]/SR:5.2f} с  (дроп трека посажен на 3.62 и 16.15)')
+
 if __name__ == '__main__':
     if not os.path.isdir(INBOX): sys.exit(f'нет папки {INBOX}')
     print('готовлю слоты из', INBOX)
@@ -112,3 +166,7 @@ if __name__ == '__main__':
             print(f'  {slot:<13} — сырья нет, остаётся синтез'); continue
         if p not in cache: cache[p] = trim_silence(decode(p))
         write(slot, fn(cache[p].copy()))
+    kp = find('typing')
+    if kp: cut_keys(kp, [0.97, 1.57, 2.13, 2.67, 3.06, 3.67])
+    bp = find('Glass_Horizon')
+    if bp: prep_bed(bp)

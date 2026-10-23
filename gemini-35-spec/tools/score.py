@@ -12,7 +12,7 @@ v2. Что изменилось против первой версии и поч
   • у музыки не было ни одной мелодии. Теперь есть мотив из четырёх нот,
     который приходит на искре и возвращается на энд-карде.
 """
-import json, math, os, sys, wave
+import json, math, os, subprocess, sys, wave
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfxlib
@@ -44,6 +44,26 @@ def noise(n): return rng.standard_normal(n)
 SFXLIB = sfxlib.load(verbose=True)
 if SFXLIB:
     print(f"сэмплов подключено: {len(SFXLIB)}/{len(sfxlib.SLOTS)}")
+
+def load_bed():
+    """Фоновый трек, уже нарезанный под монтаж в sfx_prep. Стерео, поэтому
+    мимо sfxlib, который сводит всё в моно."""
+    path = os.path.join(sfxlib.SFX_DIR, 'music_bed.wav')
+    if not os.path.isfile(path): return None
+    r = subprocess.run(['ffmpeg', '-v', 'error', '-i', path, '-ar', str(SR), '-ac', '2', '-f', 'f32le', '-'],
+                       capture_output=True)
+    b = np.frombuffer(r.stdout, dtype='<f4').astype(np.float64).reshape(-1, 2).T
+    out = np.zeros((2, N))
+    k = min(N, b.shape[1]); out[:, :k] = b[:, :k]
+    return out
+
+BED = load_bed()
+HASBED = BED is not None
+# у присланного трека своя ритм-секция: мои барабаны, бас и арпеджио молчат,
+# пэды уходят на подклад, суб-удары остаются — они ложатся под дропы трека
+W_RHY = 0.0 if HASBED else 1.0
+W_PAD = 0.30 if HASBED else 1.0
+if HASBED: print('фоновый трек подключён: ритм-секция синтеза отключена')
 
 def S(slot, fallback):
     x = SFXLIB.get(slot)
@@ -299,7 +319,8 @@ def place(bus, sig, at, gain=1.0, pan=0.0, width=0.0):
     bus[0, i:i+len(L)] += L
     bus[1, i:i+len(R)] += R
 
-def place_low(sig, at, gain=1.0):
+def place_low(sig, at, gain=1.0, kind='sub'):
+    if HASBED and kind in ('kick', 'bass'): return
     i = int(at*SR)
     if i < 0 or i >= N: return
     s = sig[:N-i]*gain
@@ -311,14 +332,14 @@ def place_low(sig, at, gain=1.0):
 Dm, Dsus, Dadd9, Dmaj = [0, 3, 7, 12], [0, 5, 7, 12], [0, 4, 7, 14], [0, 4, 7, 11]
 
 # 1. интро под слэмы — дрон тише, чем был: слэмы должны пробивать
-place(music, pad([-12, -5, 3], 3.4, cut=600, hpf=90), 0.0, 0.42, width=14)
+place(music, pad([-12, -5, 3], 3.4, cut=600, hpf=90), 0.0, W_PAD*0.42, width=14)
 place(music, riser(2.3, 110, 2900, 0.26, note=0), 0.0, 1.0)
-place(music, shimmer([0, 7], 2.4), 0.1, 0.32, width=18)
+place(music, shimmer([0, 7], 2.4), 0.1, W_PAD*0.32, width=18)
 for i, s in enumerate(SLAMS):
     g = 1.0 if i < 3 else 1.3
     place_pre(sfx, S('suck', suck(0.28)), s, 0.55*g, trim=0.30)
     place_impact(sfx, f'slam_{i+1}', impact(0.6, 150+i*18, 0.9+0.12*i), s, 0.85*g, pan=(-0.12, 0.12, -0.08, 0)[i], width=6, bright=0.30)
-    place_low(S('sub_drop', sub_hit(60, 32, 0.40)), s, 0.72*g)
+    place_low(S('sub_drop', sub_hit(60, 32, 0.40)), s, 0.95*g)
     place(sfx, WH(0.34, 400, 3000, -0.6, 0.6), s-0.20, 0.30)
 place(music, S('crash', crash(1.6)), SLAMS[3], 0.18)
 
@@ -326,11 +347,11 @@ place(music, S('crash', crash(1.6)), SLAMS[3], 0.18)
 place(sfx, WH(0.55, 500, 5200, 0.7, -0.7), 2.42, 0.55)
 place(sfx, S('click_ui', click(0.22, 900)), 2.74, 0.32)
 for j, sm in enumerate(HOOK):
-    place(music, bell(hz(sm+12), 1.8), 2.80 + j*0.16, 0.26 - j*0.02, pan=-0.35 + j*0.23, width=10)
+    place(music, bell(hz(sm+12), 1.8), 2.80 + j*0.16, W_PAD*0.26 - j*0.02, pan=-0.35 + j*0.23, width=10)
 
 # 3. дроп 1 — несёт широкий яркий аккорд, суб только подпирает
 place_pre(sfx, S('suck', suck(0.34)), DROP1, 0.7, trim=1.10)
-place_low(S('sub_drop', sub_hit(70, 32, 0.46, 1.8)), DROP1, 0.70)
+place_low(S('sub_drop', sub_hit(70, 32, 0.46, 1.8)), DROP1, 0.95)
 place(music, stab(Dm, 1.4), DROP1, 0.80, width=16)
 place_impact(sfx, 'impact_mid', impact(0.7, 130, 1.25), DROP1, 0.95, width=8, bright=0.55)
 place(music, S('crash', crash(2.0)), DROP1, 0.30, pan=0.15)
@@ -341,36 +362,41 @@ for j, sm in enumerate(HOOK):
 tb = DROP1
 while tb < 5.5:
     k = int(round((tb-DROP1)/(BEAT/2)))
-    place(music, hat(open_=(k % 4 == 3)), tb, 0.55 if k % 2 else 0.85, pan=-0.3 if k % 2 else 0.3)
+    place(music, hat(open_=(k % 4 == 3)), tb, W_RHY*(0.55 if k % 2 else 0.85), pan=-0.3 if k % 2 else 0.3)
     tb += BEAT/2
 for j, sm in enumerate([0, 0, -2, 3]):
-    place_low(bass(sm, 0.46), DROP1 + j*BEAT, 0.34)
+    place_low(bass(sm, 0.46), DROP1 + j*BEAT, 0.34, 'bass')
 place(sfx, WH(0.75, 600, 7000, -0.8, 0.8), 4.85, 0.75)
 
 # 4. приложение — басовая линия движется, арпеджио раскинуто по панораме
-place(music, pad([-12, -9, -5, -2], 6.4, cut=900, hpf=100), 5.5, 0.52, width=24)
-place(music, shimmer([0, 3, 7], 6.4), 5.6, 0.55, width=26)
+place(music, pad([-12, -9, -5, -2], 6.4, cut=900, hpf=100), 5.5, W_PAD*0.52, width=24)
+place(music, shimmer([0, 3, 7], 6.4), 5.6, W_PAD*0.55, width=26)
 arp = [0, 7, 10, 7, 12, 7, 10, 3]
 bassline = [0, 0, -4, -4, -2, -2, 3, 3]
 k = 0; tb = 5.5
 while tb < 12.0:
-    place(music, pluck(arp[k % 8], 0.42), tb, 0.24, pan=-0.55 + 0.37*(k % 4))
+    place(music, pluck(arp[k % 8], 0.42), tb, W_RHY*0.24, pan=-0.55 + 0.37*(k % 4))
     if k % 2 == 0:
-        place_low(bass(bassline[(k//2) % 8], 0.44), tb, 0.28)
-        place_low(kick(), tb, 0.30)
-    place(music, hat(dur=0.07), tb + BEAT/4, 0.18, pan=0.4 if k % 2 else -0.4)
+        place_low(bass(bassline[(k//2) % 8], 0.44), tb, 0.28, 'bass')
+        place_low(kick(), tb, 0.30, 'kick')
+    place(music, hat(dur=0.07), tb + BEAT/4, W_RHY*0.18, pan=0.4 if k % 2 else -0.4)
     k += 1; tb += BEAT/2
 place(sfx, WH(0.6, 300, 2400, -0.7, 0.2), 5.52, 0.45)
 place(sfx, WH(0.7, 700, 8000, 0.3, -0.9), 6.95, 0.70)
 place_impact(sfx, 'impact_soft', impact(0.4, 220, 1.5, body=0.5), 7.50, 0.50, bright=0.4)
 
 # 5. набор текста — тики с разбросом по высоте и панораме, иначе это пулемёт
+KEYS = [SFXLIB[k] for k in ('key_1', 'key_2', 'key_3', 'key_4', 'key_5', 'key_6') if k in SFXLIB]
+# 29 символов за 1.28 с — это 22 нажатия в секунду. Глаз быстрый набор
+# принимает, ухо слышит стрекот. Звучит каждый третий символ: ~8 в секунду,
+# как у человека, и шесть разных нажатий по кругу, чтобы не было пулемёта.
+_kr = np.random.default_rng(31)
 for i, ch in enumerate(PROMPT):
-    if ch == ' ': continue
+    if ch == ' ' or i % 3: continue
     p = (i+1)/len(PROMPT)
-    at = TYPE_START + (TYPE_END-TYPE_START)*(p**(1/0.94))
-    f = 1900 + (hash(ch) % 7)*150
-    place(sfx, S('tick_type', tick(0.045, f, 1.0)), at, 0.17 + 0.05*((i % 3) == 0), pan=-0.45 + 0.9*p)
+    at = TYPE_START + (TYPE_END-TYPE_START)*(p**(1/0.94)) + float(_kr.uniform(-0.012, 0.012))
+    sig = KEYS[(i//3) % len(KEYS)] if KEYS else S('tick_type', tick(0.045, 1900 + (i % 7)*150, 1.0))
+    place(sfx, sig, at, 0.30 + 0.08*float(_kr.random()), pan=-0.40 + 0.8*p)
 
 # 6. отправка
 place(sfx, WH(0.5, 600, 5600, -0.5, 0.5), 11.02, 0.60)
@@ -382,58 +408,58 @@ place(sfx, WH(0.8, 900, 9000, 0.0, 0.0), 12.55, 0.80)
 
 # 7. билд — и тишина перед дропом: без паузы дроп не читается как дроп
 place_pre(music, S('riser_build', riser(3.05, 190, 7000, 0.44, note=0)), DROP2, 1.0)
-place(music, pad([0, 7, 12], 3.0, cut=1300), 12.80, 0.26, width=18)
+place(music, pad([0, 7, 12], 3.0, cut=1300), 12.80, W_PAD*0.26, width=18)
 place_pre(music, S('crash_rev', crash(1.9, rev=True)), DROP2, 0.42)
 tb, step = 12.9, BEAT
 while tb < 15.92:
-    place(music, hat(0.07), tb, 0.48, pan=-0.35 if int(tb*7) % 2 else 0.35)
+    place(music, hat(0.07), tb, W_RHY*0.48, pan=-0.35 if int(tb*7) % 2 else 0.35)
     step = max(BEAT/8, step*0.88); tb += step
 for j in range(3):
     place(sfx, WH(0.45, 400, 3600, -0.8 + j*0.5, 0.8 - j*0.4), 12.95 + j*0.42, 0.28)
-place_low(bass(0, 0.9), 15.1, 0.26)
+place_low(bass(0, 0.9), 15.1, 0.26, 'bass')
 # 15.92–16.15 — дыра: ничего не играет
 
 # 8. дроп 2 — самый большой. Ширина и верх, а не один низ
 place_pre(sfx, S('suck', suck(0.42)), DROP2, 0.95, trim=2.00)
-place_low(S('sub_drop', sub_hit(72, 30, 0.48, 2.0)), DROP2, 0.60)
+place_low(S('sub_drop', sub_hit(72, 30, 0.48, 2.0)), DROP2, 1.05)
 place(music, stab(Dadd9, 1.5, cut=8000), DROP2, 0.92, width=20)
 place_impact(sfx, 'impact_big', impact(0.8, 115, 1.4), DROP2, 1.05, width=10, bright=1.05)
 place(music, S('crash', crash(2.4)), DROP2, 0.62, pan=-0.2)
 place(music, shimmer([0, 4, 7, 11], 3.0), DROP2, 1.6, width=26)
 place(music, stab(Dadd9, 1.3, cut=8000), 16.45, 0.70, width=22)
-place_low(S('sub_drop', sub_hit(66, 32, 0.40)), 16.45, 0.52)
+place_low(S('sub_drop', sub_hit(66, 32, 0.40)), 16.45, 0.80)
 place_impact(sfx, 'impact_mid', impact(0.7, 135, 1.3), 16.45, 0.90, width=8, bright=0.8)
-place(music, pad([0, 4, 7, 14], 5.0, cut=2600), 16.5, 0.40, width=24)
+place(music, pad([0, 4, 7, 14], 5.0, cut=2600), 16.5, W_PAD*0.40, width=24)
 for j, sm in enumerate(HOOK):
-    place(music, bell(hz(sm+12), 2.0, 1.4), 16.55 + j*0.25, 0.26, pan=-0.45 + j*0.3, width=12)
+    place(music, bell(hz(sm+12), 2.0, 1.4), 16.55 + j*0.25, W_PAD*0.26, pan=-0.45 + j*0.3, width=12)
 for w in (17.35, 17.62):
     place_impact(sfx, 'impact_soft', impact(0.45, 195, 1.2, body=0.6), w, 0.48, width=6, bright=0.30)
     place_low(S('sub_drop', sub_hit(58, 36, 0.30)), w, 0.30)
 k = 0; tb = DROP2
 bl2 = [0, 0, 4, 4, -2, -2, 3, 3]
 while tb < 21.0:
-    place_low(kick(), tb, 0.40)
-    place_low(bass(bl2[k % 8], 0.46), tb, 0.30)
-    place(music, hat(), tb + BEAT/2, 0.55, pan=0.35 if k % 2 else -0.35)
-    place(music, hat(0.07), tb + BEAT/4, 0.22, pan=-0.5)
+    place_low(kick(), tb, 0.40, 'kick')
+    place_low(bass(bl2[k % 8], 0.46), tb, 0.30, 'bass')
+    place(music, hat(), tb + BEAT/2, W_RHY*0.55, pan=0.35 if k % 2 else -0.35)
+    place(music, hat(0.07), tb + BEAT/4, W_RHY*0.22, pan=-0.5)
     k += 1; tb += BEAT
 k = 0; tb = 16.5
 while tb < 21.0:
-    place(music, pluck([0, 4, 7, 11, 7, 4][k % 6], 0.40), tb, 0.20, pan=-0.5 + 0.33*(k % 4))
+    place(music, pluck([0, 4, 7, 11, 7, 4][k % 6], 0.40), tb, W_RHY*0.20, pan=-0.5 + 0.33*(k % 4))
     k += 1; tb += BEAT/2
 
 # 9. experience
 place(sfx, WH(0.7, 400, 3800, -0.8, 0.4), 18.80, 0.50)
 place(sfx, WH(0.7, 700, 5800, 0.6, -0.5), 18.96, 0.45)
 for j, sm in enumerate(HOOK):
-    place(music, bell(hz(sm+12), 1.6), 19.30 + j*0.13, 0.20, pan=0.4 - j*0.27)
+    place(music, bell(hz(sm+12), 1.6), 19.30 + j*0.13, W_PAD*0.20, pan=0.4 - j*0.27)
 
 # 10. орб и логотип
-place(music, pad([-12, -5, 0], 2.8, cut=1200), 21.0, 0.36, width=22)
-place(music, shimmer([0, 7, 12], 3.0), 21.0, 0.38, width=28)
+place(music, pad([-12, -5, 0], 2.8, cut=1200), 21.0, W_PAD*0.36, width=22)
+place(music, shimmer([0, 7, 12], 3.0), 21.0, W_PAD*0.38, width=28)
 place(sfx, WH(1.3, 300, 4600, -0.9, 0.9), 21.05, 0.45)
 place(sfx, WH(0.9, 800, 10000, 0.8, -0.8), 21.90, 0.38)
-place_low(S('sub_drop', sub_hit(68, 32, 0.44, 1.7)), 22.30, 0.58)
+place_low(S('sub_drop', sub_hit(68, 32, 0.44, 1.7)), 22.30, 0.85)
 place_impact(sfx, 'impact_mid', impact(0.7, 145, 1.5), 22.30, 0.85, width=10, bright=0.6)
 place(music, stab(Dadd9, 1.8, cut=9000), 22.30, 0.72, width=20)
 place(music, S('crash', crash(2.2)), 22.30, 0.32, pan=0.2)
@@ -520,8 +546,16 @@ fade = np.ones(N)
 fade[:int(0.02*SR)] = np.linspace(0, 1, int(0.02*SR))
 fo = int(0.30*SR); fade[-fo:] = np.linspace(1, 0, fo)**0.6   # мягче, чтобы не рубить хвост
 
+if HASBED:
+    # присланный трек сам по себе почти без низа (0.8%) и без воздуха (0.7%),
+    # вся энергия в середине. Подкладываю полки снизу и сверху и чуть
+    # разгружаю 700 Гц — там же потом сядет голос
+    for c in (0, 1):
+        BED[c] = shelf_hi(shelf_lo(peak(BED[c], 700, -2.0, 1.1), 110, 4.0), 9000, 3.5)
+    BED *= 0.9/max(np.max(np.abs(BED)), 1e-9)
+    music = music + BED*0.92
 stem_music = (music + low*0.0)*d*0.85*fade
-stem_low = low*(0.55 + 0.45*d)*fade*0.50
+stem_low = low*(0.55 + 0.45*d)*fade*(0.80 if HASBED else 0.50)
 stem_sfx = sfx*(0.6 + 0.4*d)*fade
 mix = stem_music + stem_low + stem_sfx
 
