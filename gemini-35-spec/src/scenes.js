@@ -906,12 +906,16 @@ export function S12(ctx, L, t) {
   if (pg > 0) {
     const Rg = Math.min(W, H) * 0.165;
     ctx.save();
-    const sweep = 308 * pg;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, Rg * 1.6, (-52 * Math.PI) / 180, (-(52 + sweep) * Math.PI) / 180, true);
-    ctx.closePath();
-    ctx.clip();
+    // сектор нужен только пока знак прорисовывается. Если оставить его
+    // навсегда, он срезает верхнюю полоску перекладины и оставляет хвостик
+    if (pg < 1) {
+      const sweep = 308 * pg;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, Rg * 1.6, (-52 * Math.PI) / 180, (-(52 + sweep) * Math.PI) / 180, true);
+      ctx.closePath();
+      ctx.clip();
+    }
     googleG(ctx, cx, cy, Rg);
     ctx.restore();
     // перекладину рисует сам googleG. Вторая, своя, стояла здесь на другой

@@ -60,8 +60,16 @@ export function twinkle(ctx, x, y, r, a = 1, color = '#fff') {
 /* ---------- Google G ---------- */
 /* math angles (ccw, 0 = 3 o'clock) converted to canvas (cw, y-down) */
 const A = (deg) => (-deg * Math.PI) / 180;
+/* Пропорции сняты с официального контура (viewBox 24×24, центр 12.48/12,
+   внешний радиус 12.173, внутренний 8.72, перекладина сверху на 10.92):
+     толщина кольца      = 0.284 R
+     верх перекладины    = 0.0887 R ВЫШЕ центра, не по центру
+     высота перекладины  = 0.2695 R
+     левый край          = ровно центр круга                              */
+const G_W = 0.284, G_BAR_TOP = 0.0887, G_BAR_H = 0.2695;
+
 export function googleG(ctx, x, y, R, { alpha = 1, mono = null } = {}) {
-  const w = R * 0.30;             // stroke width
+  const w = R * G_W;              // stroke width
   const rr = R - w / 2;           // centre-line radius
   ctx.save();
   ctx.globalAlpha *= alpha;
@@ -76,15 +84,16 @@ export function googleG(ctx, x, y, R, { alpha = 1, mono = null } = {}) {
   seg(52, 162, G_RED);
   seg(162, 222, G_YEL);
   seg(222, 292, G_GRN);
-  seg(292, 360, G_BLUE);
+  // синяя дуга доводится до верхней грани перекладины, а не до 3 часов:
+  // иначе её торец торчит над перекладиной тонким козырьком
+  seg(292, 360 + (Math.asin(R * G_BAR_TOP / rr) * 180) / Math.PI, G_BLUE);
   // Перекладина. Её верхняя грань лежит ровно на центре круга — там же,
   // где кончается синяя дуга. Если поднять её выше, угол торчит в пустой
   // середине буквы отдельным прямоугольным зубцом.
   ctx.save();
   ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.clip();   // правый край режет сам круг
   ctx.fillStyle = mono || G_BLUE;
-  roundRect(ctx, x + R * 0.04, y, R * 1.10, w, w * 0.08);
-  ctx.fill();
+  ctx.fillRect(x, y - R * G_BAR_TOP, R * 1.10, R * G_BAR_H);
   ctx.restore();
   ctx.restore();
 }
