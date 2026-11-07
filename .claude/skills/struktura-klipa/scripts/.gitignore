@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+razbor/
+*.mp4
+*.mov
+*.jpg
+*.png
