@@ -84,20 +84,20 @@ def meta(path, vf, key):
     return pairs
 
 
-def cuts(path, threshold):
-    vf = (f"select='gt(scene,{threshold})',"
+def cuts(path, threshold, crop=""):
+    vf = (crop +f"select='gt(scene,{threshold})',"
           "metadata=print:key=lavfi.scene_score:file=-")
     return [t for t, _ in meta(path, vf, "lavfi.scene_score")]
 
 
-def curve_motion(path):
-    vf = ("fps=4,tblend=all_mode=difference,signalstats,"
+def curve_motion(path, crop=""):
+    vf = (crop +"fps=4,tblend=all_mode=difference,signalstats,"
           "metadata=print:key=lavfi.signalstats.YAVG:file=-")
     return meta(path, vf, "lavfi.signalstats.YAVG")
 
 
-def curve_bright(path):
-    vf = "fps=4,signalstats,metadata=print:key=lavfi.signalstats.YAVG:file=-"
+def curve_bright(path, crop=""):
+    vf = crop + "fps=4,signalstats,metadata=print:key=lavfi.signalstats.YAVG:file=-"
     return meta(path, vf, "lavfi.signalstats.YAVG")
 
 
@@ -171,38 +171,42 @@ def font(path, size):
         return ImageFont.load_default()
 
 
-def contact_sheet(path, shots, outdir, vertical):
-    """Середина каждого кадра плиткой, с номером и длиной под каждой."""
+def tile_sheet(path, items, outdir, vertical, name):
+    """Плитка из кадров: items = [(время, подпись слева, подпись справа)]."""
     tw = 200
     th = int(tw * 16 / 9) if vertical else int(tw * 9 / 16)
     cols = 6 if vertical else 4
     bar, pad = 34, 8
-    shown = shots[:MAX_TILES]
-    rows = (len(shown) + cols - 1) // cols
-    W = cols * (tw + pad) + pad
-    H = rows * (th + bar + pad) + pad
-    sheet = Image.new("RGB", (W, H), (18, 18, 20))
+    items = items[:MAX_TILES]
+    rows = (len(items) + cols - 1) // cols
+    sheet = Image.new("RGB", (cols * (tw + pad) + pad,
+                              rows * (th + bar + pad) + pad), (18, 18, 20))
     d = ImageDraw.Draw(sheet)
-    f_num = font(FONT_BOLD, 17)
-    f_dur = font(FONT_REG, 15)
+    f_l, f_r = font(FONT_BOLD, 17), font(FONT_REG, 15)
     tmp = os.path.join(outdir, "_frame.jpg")
-    for i, s in enumerate(shown):
+    for i, (t, left, right) in enumerate(items):
         x = pad + (i % cols) * (tw + pad)
         y = pad + (i // cols) * (th + bar + pad)
-        mid = s["in"] + s["dur"] / 2
-        if grab(path, mid, tmp):
+        if grab(path, t, tmp):
             with Image.open(tmp) as im:
                 sheet.paste(im.convert("RGB").resize((tw, th)), (x, y))
         else:
             d.rectangle([x, y, x + tw, y + th], fill=(40, 40, 44))
-        d.text((x + 2, y + th + 6), f"{s['n']}", font=f_num, fill=(255, 255, 255))
-        d.text((x + tw - 2, y + th + 7), f"{s['dur']:.2f}s", font=f_dur,
+        d.text((x + 2, y + th + 6), left, font=f_l, fill=(255, 255, 255))
+        d.text((x + tw - 2, y + th + 7), right, font=f_r,
                fill=(150, 150, 158), anchor="ra")
     if os.path.exists(tmp):
         os.remove(tmp)
-    dst = os.path.join(outdir, "contact.jpg")
+    dst = os.path.join(outdir, name)
     sheet.save(dst, quality=88)
-    return dst, len(shown)
+    return dst, len(items)
+
+
+def contact_sheet(path, shots, outdir, vertical):
+    """Середина каждого кадра плиткой, с номером и длиной под каждой."""
+    items = [(s["in"] + s["dur"] / 2, str(s["n"]), f"{s['dur']:.2f}s")
+             for s in shots]
+    return tile_sheet(path, items, outdir, vertical, "contact.jpg")
 
 
 def main():
@@ -215,6 +219,15 @@ def main():
     ap.add_argument("--views", default="неизвестно",
                     help="охват ролика, попадает в паспорт")
     ap.add_argument("--no-sheet", action="store_true")
+    ap.add_argument("--crop", metavar="Ш:В:X:Y",
+                    help="считать события только по части кадра, синтаксис "
+                         "ffmpeg. Нужно для жанра обогащения: ритм там задают "
+                         "субтитры и оверлеи, а не склейки. Полоса субтитров "
+                         "вертикали 720x1280 — примерно 720:180:0:540")
+    ap.add_argument("--grid", type=float, metavar="СЕК",
+                    help="дополнительно: сетка кадров через каждые N секунд. "
+                         "Нужна для непрерывного дубля, где контактный лист "
+                         "по кадрам вырождается в одну плитку")
     a = ap.parse_args()
 
     if not os.path.exists(a.video):
@@ -225,9 +238,10 @@ def main():
     if info["duration"] <= 0:
         sys.exit("нулевая длительность — файл битый или это не видео")
 
-    shots, dropped = build_shots(cuts(a.video, a.threshold),
+    crop = f"crop={a.crop}," if a.crop else ""
+    shots, dropped = build_shots(cuts(a.video, a.threshold, crop),
                                  info["duration"], a.min_shot)
-    mot, bri = curve_motion(a.video), curve_bright(a.video)
+    mot, bri = curve_motion(a.video, crop), curve_bright(a.video, crop)
     for s in shots:
         s["motion"] = window(mot, s["in"], s["out"], drop_peak=True)
         s["bright"] = window(bri, s["in"], s["out"])
@@ -238,6 +252,7 @@ def main():
         "views": a.views,
         **info,
         "threshold": a.threshold,
+        "crop": a.crop,
         "min_shot": a.min_shot,
         "flashes_dropped": dropped,
         "shots": len(shots),
@@ -285,12 +300,21 @@ def main():
         dst, shown = contact_sheet(a.video, shots, a.outdir, info["vertical"])
         note = "" if shown == len(shots) else f" (первые {shown} из {len(shots)})"
         print(f"\nконтактный лист: {dst}{note}")
+    if a.grid:
+        n = int(info["duration"] // a.grid) + 1
+        items = [(i * a.grid, f"{int(i * a.grid // 60)}:{i * a.grid % 60:04.1f}",
+                  "") for i in range(n) if i * a.grid < info["duration"]]
+        dst, shown = tile_sheet(a.video, items, a.outdir, info["vertical"],
+                                "grid.jpg")
+        print(f"сетка каждые {a.grid} с: {dst} ({shown} кадров)")
     print(f"таблица: {os.path.join(a.outdir, 'shots.md')}")
     if dropped:
         print(f"\n! отброшено детекций как вспышки: {dropped} "
               f"(короче {a.min_shot} с) — сверь по контактному листу")
     if len(shots) < 2:
-        print("\n! кадр один — либо непрерывный дубль, либо порог завышен")
+        print("\n! кадр один — либо непрерывный дубль, либо порог завышен. "
+              "Снизь --threshold до 0.10; если число не меняется, дубль "
+              "действительно непрерывный — смотри его через --grid 2")
 
 
 if __name__ == "__main__":
