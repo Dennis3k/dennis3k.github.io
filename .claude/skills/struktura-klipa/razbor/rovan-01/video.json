@@ -1,0 +1,25 @@
+{
+  "file": "src.mp4",
+  "views": "неизвестно",
+  "fps": 24.0,
+  "width": 720,
+  "height": 1280,
+  "duration": 17.195,
+  "has_audio": true,
+  "aspect": "720:1280",
+  "vertical": true,
+  "threshold": 0.3,
+  "crop": null,
+  "min_shot": 0.25,
+  "flashes_dropped": 0,
+  "shots": 3,
+  "dur_mean": 5.73,
+  "dur_median": 2.67,
+  "dur_min": 2.42,
+  "dur_max": 12.11,
+  "cuts_per_sec": 0.12,
+  "loudness": {
+    "peak_momentary_lufs": -11.2,
+    "mean_momentary_lufs": -16.3
+  }
+}
