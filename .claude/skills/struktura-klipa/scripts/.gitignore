@@ -5,3 +5,4 @@ razbor/
 *.mov
 *.jpg
 *.png
+!razbor/**/*.pdf
