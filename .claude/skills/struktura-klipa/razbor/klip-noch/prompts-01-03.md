@@ -7,10 +7,10 @@
 
 ## КАДР 1 — крупный, три четверти. 0.00–8.24 с. Обложка клипа
 
-Грудь вне кадра намеренно: принт Джаганнатхи в этот план не попадает.
+Версия от 2026-11-09, со всеми накопленными правками: солнце вне кадра, одежда двумя слоями, принт описан честно и ограничен границей кадра, а не запретом.
 
 ```
-The man in the attached reference image is the subject. Preserve his identity exactly. Do not redesign him, do not idealise him, do not beautify him, do not make him younger or older, do not make his face more symmetrical.
+The man in the attached reference images is the subject. Preserve his identity exactly. Do not redesign him, do not idealise him, do not beautify him, do not make him younger or older, do not make his face more symmetrical.
 
 Take the following directly from the reference, unchanged:
 EYES — the exact iris colour, the exact eye shape, the lid fold, the depth of the set, the spacing between the eyes, the brow shape and weight above them, and the fine lines at the outer corners. Do not change the iris colour. Do not enlarge, widen or prettify the eyes.
@@ -21,17 +21,20 @@ SKIN — the exact tone and undertone, the exact degree of tan and weathering, t
 BEARD — the exact length, the exact density and where it grows and where it does not, the exact colour and the exact distribution of grey.
 HAIR — the exact length, the exact wave, the exact way it is swept back and to one side, the exact base colour, the exact sun-bleached lighter strands, and the matte dry salt-air texture. No gel, no shine, no restyling.
 AGE AND BUILD — exactly as in the reference.
-Invent nothing about the face, the hair or the build. Where a detail is not visible in the reference, keep it neutral rather than inventing it.
+Invent nothing about the face, the hair or the build.
 
-Visible wardrobe: only the collar of the open cream linen shirt and the single short strand of small round amber-brown wooden beads sitting snug at the base of the neck, both exactly as in the reference. No other clothing is in frame.
+WARDROBE — critical, follow exactly. He wears TWO layers and both are visible:
+OUTER LAYER — a cream linen shirt that is COMPLETELY UNBUTTONED and hanging OPEN. Every button is undone from the collar down. The two front panels fall apart to the left and right, leaving a wide open gap down the centre of his chest. The collar is open and spread. Soft, visibly creased, slightly oversized fabric. The shirt must NOT be buttoned, must NOT be closed, must NOT be fastened at any point.
+INNER LAYER — beneath the open shirt, an ecru cotton t-shirt with a plain round crew neckline, carrying the large round Jagannath deity print across the chest exactly as in the reference: wide circular white eyes ringed in red and black, red and charcoal forms, ochre and gold accents, in a worn faded watercolour-washed texture. Reproduce the print as it is in the reference; do not redesign it, do not invent a different design, do not add lettering. His bare chest is NOT visible; the t-shirt covers it completely.
+NECKLACE — a single short strand of small round amber-brown wooden beads, snug against bare skin at the base of the throat, above the t-shirt neckline.
 
-Framing and pose, this is what changes from the reference: a tight vertical close-up, head and the very top of the shoulders only. The chest and any garment print are entirely below the bottom edge of frame. He is turned three-quarters toward camera-left, his gaze travelling past the lens to the horizon, never into the camera. Head upright, chin level. Expression still and inward, unperformed: neither sad nor smiling, a man thinking rather than posing. Wind lifts a few strands of his hair across the forehead and off the temple. He occupies roughly two thirds of the frame height, set slightly right of centre, with open sky above his head.
+FRAMING AND POSE: a tight vertical close-up. The bottom edge of the frame falls at his collarbones, so the shoulders, the open shirt collar, the t-shirt neckline and the beads are in frame while the chest below is not. He is turned three-quarters toward camera-left, his gaze travelling past the lens to the horizon, never into the camera. Head upright, chin level. Expression still and inward, unperformed: neither sad nor smiling, a man thinking rather than posing. Lips slightly parted. Wind lifts a few strands of his hair across the forehead and off the temple.
 
-Background and light: the clifftop at Seven Sisters, East Sussex, England, at golden hour. The sun is a low orange disc resting just above the sea on the far left, laying a long broken column of gold glitter across the water. Behind him the chalk cliffs and the sea fall far out of focus into soft orange and white shapes; the glitter on the water reads as a blurred vertical band of gold bokeh past his shoulder. Warm directional sunlight from the left rim-lights his hair and the edge of his face; soft warm bounce fills the shadows. No other light source. Shallow depth of field, background fully defocused.
+LIGHT AND BACKGROUND — critical, follow exactly. This is a tight close-up, therefore THE SUN IS NOT IN THIS FRAME. The sun sits far outside the left edge of the image. Do not place a sun disc anywhere in the picture. Do not place a bright sun near his head, his cheek or his shoulder. There is no visible sun, no visible horizon line, no visible sun reflection path on the water. What remains of the sunlight: a warm orange rim along the top and left edge of his hair and along the left edge of his jaw and cheekbone; a soft warm bloom spilling in from beyond the left edge of frame; and behind him the sea and the white chalk cliffs of Seven Sisters thrown completely out of focus into a smooth wash of orange, amber and rose, with diffuse golden bokeh where the light scatters on the water. Soft warm bounce fills the shadow side of his face. No other light source.
 
-Full-frame cinema camera, vertical 9:16, photorealistic, cinematic colour grade, natural film grain, no stylisation.
+Full-frame cinema camera, long lens, vertical 9:16, photorealistic, cinematic colour grade, natural film grain, no stylisation, background fully defocused.
 
-Negative: a different man, altered facial features, changed eye colour, changed nose, changed lip shape, smoothed skin, retouched skin, removed wrinkles, younger face, symmetrical face, restyled hair, different beard length, looking into camera, text, lettering, captions, watermark, logo, signature, extra limbs, deformed hands, plastic skin, HDR halos, oversaturation, second sun, other people.
+Negative: sun in frame, sun disc, visible sun, sun near his face, sun beside his head, bright light source in frame, visible horizon line, sun reflection path on water, sharp background, buttoned shirt, closed shirt, fastened shirt, shirt done up, bare chest, bare skin under the shirt, no undershirt, missing t-shirt, blank t-shirt, plain t-shirt with no design, V-neck t-shirt, a different man, altered facial features, changed eye colour, changed nose, changed lip shape, smoothed skin, retouched skin, removed wrinkles, younger face, symmetrical face, restyled hair, different beard length, looking into camera, text, lettering, captions, watermark, signature, extra limbs, deformed hands, plastic skin, HDR halos, oversaturation, second sun, other people.
 ```
 
 ---
