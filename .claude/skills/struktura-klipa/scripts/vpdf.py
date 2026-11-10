@@ -140,6 +140,8 @@ def main():
     ap.add_argument("--title", required=True)
     ap.add_argument("--sub", default="")
     ap.add_argument("--meta", default="", help="подзаголовок титула, можно <br>")
+    ap.add_argument("--no-cover", action="store_true",
+                    help="без титула и колонтитула: только содержимое файла")
     ap.add_argument("--pre-pt", default="7.0",
                     help="кегль блоков кода; для длинных промтов с полным замком личности 6.2")
     a = ap.parse_args()
@@ -147,7 +149,7 @@ def main():
     src, dst, title, sub, meta = a.markdown, a.out, a.title, a.sub, a.meta
     body = convert(open(src, encoding="utf-8").read())
     body = re.sub(r'^<h1>.*?</h1>\n?', '', body, count=1)
-    cover = (f'<div class="cover"><h1>{html.escape(title)}</h1>'
+    cover = "" if a.no_cover else (f'<div class="cover"><h1>{html.escape(title)}</h1>'
              f'<div class="rule"></div>'
              f'<div class="sub">{html.escape(sub)}</div>'
              f'<div class="meta">{meta}</div></div>')
@@ -159,7 +161,7 @@ def main():
         f'<title>{html.escape(title)}</title><style>{css}</style></head>'
         f'<body>{cover}{body}</body></html>')
     open(js, "w", encoding="utf-8").write(RENDER)
-    foot = f"{title} · {sub}" if sub else title
+    foot = " " if a.no_cover else (f"{title} · {sub}" if sub else title)
     r = subprocess.run(["node", js, page, os.path.abspath(dst), foot],
                        capture_output=True, text=True)
     if r.returncode != 0:
