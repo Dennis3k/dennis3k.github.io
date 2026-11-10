@@ -58,7 +58,7 @@ Rendering: a candid documentary photograph on a full-frame camera, 100 mm macro 
 
 ## КАДР 4 — средний-широкий, профиль (по пояс)
 
-**Приложить: 1) главный кадр героя (обновлённый, с приглушённым принтом), 2) файл принта print-muted. Если профиль не держит лицо, запасной вариант: три четверти с другой высоты.**
+**Приложить: один файл, главный кадр героя (обновлённый, с приглушённым принтом). Принт берётся с футболки на нём. Если профиль не держит лицо, запасной вариант: три четверти с другой высоты.**
 
 ```
 The man in the first attached image is the subject. Preserve his identity exactly. Do not redesign him, do not idealise him, do not beautify him, do not make him younger or older, do not make his face more symmetrical. Below, "the reference" means the first attached image.
@@ -74,9 +74,7 @@ HAIR — the exact length, the exact wave, the exact way it is swept back and to
 AGE AND BUILD — exactly as in the reference: a man in his late forties with a lean build.
 Invent nothing about the face, the hair or the build. Where a detail is not visible in the reference, keep it neutral rather than inventing it.
 
-The second attached image is the print for his t-shirt and serves only for that: take from it the design itself and nothing else, none of its background, surroundings or lighting.
-
-Wardrobe, all of it visible in frame: an open cream linen shirt with the sleeves pushed up, worn over a cream cotton t-shirt, and the single short strand of small round amber-brown wooden beads sitting snug at the base of the neck, the shirt and the beads exactly as in the reference. The shirt is soft natural linen, loosely draped, mostly smooth with a few broad soft creases. On the chest of the t-shirt, centred, is the design from the second attached image, reproduced exactly as it is there: the same shapes, the same colours, the same proportions and the same details, a clean intact print with solid ink, lying flat on the cotton and following the folds of the fabric, taking the same dusk light as the rest of the garment.
+Wardrobe, all of it visible in frame: an open cream linen shirt with the sleeves pushed up, worn over a cream cotton t-shirt, and the single short strand of small round amber-brown wooden beads sitting snug at the base of the neck, the shirt and the beads exactly as in the reference. The shirt is soft natural linen, loosely draped, mostly smooth with a few broad soft creases. On the chest of the t-shirt, centred, is the printed design exactly as it appears on the t-shirt in the reference, reproduced exactly as it is there: the same shapes, the same colours, the same proportions and the same details, a clean intact print with solid ink, lying flat on the cotton and following the folds of the fabric, taking the same dusk light as the rest of the garment.
 
 Framing and pose, this is what changes from the reference: a medium-wide shot, vertical, from the top of the head with room above it down to the waist, so the open shirt, the whole t-shirt print, the beads and a little of the grass in front of him are all in frame. He sits in the grass on the edge of a chalk cliff, the camera at the height of his face and to his right, so that his head is seen in profile, facing the left of the frame; his shoulders and torso are turned a little toward the camera, as in the reference, so the print is visible. His gaze travels to the left, to the pale band of the horizon, far past the frame. Head upright, chin level, shoulders relaxed, hands below the bottom edge of frame. Expression still and inward, unperformed: neither sad nor smiling, a man thinking rather than posing. A steady sea wind blows along the frame and lifts the strands of his hair toward the left, across the forehead and off the temple, and stirs the collar of the shirt. His head takes roughly one quarter of the frame height, set slightly right of centre.
 
@@ -197,7 +195,7 @@ Rendering: a candid documentary photograph on a full-frame camera, 400 mm lens, 
 
 ## КАДР 10 — начальный кадр отъезда, средний с высоты
 
-**Приложить: 1) главный кадр героя (обновлённый, с приглушённым принтом), 2) файл принта print-muted. Конец отъезда делает видеогенерация.**
+**Приложить: один файл, главный кадр героя (обновлённый, с приглушённым принтом). Принт берётся с футболки на нём. Конец отъезда делает видеогенерация.**
 
 ```
 The man in the first attached image is the subject. Preserve his identity exactly. Do not redesign him, do not idealise him, do not beautify him, do not make him younger or older, do not make his face more symmetrical. Below, "the reference" means the first attached image.
@@ -213,9 +211,7 @@ HAIR — the exact length, the exact wave, the exact way it is swept back and to
 AGE AND BUILD — exactly as in the reference: a man in his late forties with a lean build.
 Invent nothing about the face, the hair or the build. Where a detail is not visible in the reference, keep it neutral rather than inventing it.
 
-The second attached image is the print for his t-shirt and serves only for that: take from it the design itself and nothing else, none of its background, surroundings or lighting.
-
-Wardrobe, all of it visible in frame: an open cream linen shirt with the sleeves pushed up, worn over a cream cotton t-shirt, and the single short strand of small round amber-brown wooden beads sitting snug at the base of the neck, the shirt and the beads exactly as in the reference. The shirt is soft natural linen, loosely draped, mostly smooth with a few broad soft creases. On the chest of the t-shirt, centred, is the design from the second attached image, reproduced exactly as it is there: the same shapes, the same colours, the same proportions and the same details, a clean intact print with solid ink, lying flat on the cotton and following the folds of the fabric, taking the same dusk light as the rest of the garment.
+Wardrobe, all of it visible in frame: an open cream linen shirt with the sleeves pushed up, worn over a cream cotton t-shirt, and the single short strand of small round amber-brown wooden beads sitting snug at the base of the neck, the shirt and the beads exactly as in the reference. The shirt is soft natural linen, loosely draped, mostly smooth with a few broad soft creases. On the chest of the t-shirt, centred, is the printed design exactly as it appears on the t-shirt in the reference, reproduced exactly as it is there: the same shapes, the same colours, the same proportions and the same details, a clean intact print with solid ink, lying flat on the cotton and following the folds of the fabric, taking the same dusk light as the rest of the garment.
 
 Framing and pose, this is what changes from the reference: a medium shot, vertical, taken from above, the camera about two metres above his head and two metres in front of him, looking down at him at an angle of about forty-five degrees, from the top of the head down to the lowest ribs. He sits in the grass on the edge of a chalk cliff, turned three-quarters toward the left of the frame, his gaze travelling past the lens to the pale band of the horizon, his lips slightly parted as if about to sing a word. Hands below the bottom edge of frame. Expression still and inward, unperformed. A steady sea wind blows along the frame and lifts the strands of his hair toward the left. Behind and below him the cliff edge falls away, and the chalk cliffs run off into the distance along the shore, soft and defocused. His head takes roughly one quarter of the frame height, set slightly right of centre.
 
