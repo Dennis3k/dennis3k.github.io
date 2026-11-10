@@ -101,7 +101,7 @@ Light: the clifftop at Seven Sisters, East Sussex, England, in the blue hour, tw
 Rendering: a candid documentary photograph on a full-frame camera, 300 mm lens, f/5.6, ISO 800, the gull sharp, the water and the sky smooth, ungraded colour, a clean low-noise file.
 ```
 
-## КАДР 6 — дальний, на уровне глаз, широко (12 секунд)
+## КАДР 6 — дальний, снизу с пляжа, широко (12 секунд)
 
 **Приложить: 1) утверждённый главный кадр героя. Второй файл не нужен.**
 
@@ -116,7 +116,7 @@ Invent nothing about the face, the hair or the build.
 
 Wardrobe, small in the frame and as in the reference: an open cream linen shirt with the sleeves pushed up over a cream cotton t-shirt, loose muted grey-brown linen trousers, and the wooden beads at his neck. His feet are hidden in the grass and out of frame.
 
-Framing and pose, this is what changes from the reference: a very wide vertical shot, the camera low and at the height of his eyes, far from him. He is a small figure, about one tenth of the frame height, seated in the grass at the edge of the chalk cliff in the left third of the frame, his torso toward the camera, his face lifted and tilted up toward the sky, chin raised, as if asking the sky a question. The sky fills more than half of the frame. Below it the sea lies dark and flat, and the chalk cliffs run away to the right as a pale receding line. A steady sea wind bends the grass and lifts his hair.
+Framing and pose, this is what changes from the reference: a very wide vertical shot taken from the shingle beach far below the cliff, the camera at the height of a standing person and looking up. A wall of white chalk cliff rises along the right side of the frame in strong perspective, from the loose scree and shingle at its foot to its grassy top edge, which lies in the upper right quarter of the frame. At that top edge, tiny against the sky, sits the man, about one twentieth of the frame height, seated in the grass at the very brink of the cliff, his face lifted toward the sky, chin raised, as if asking the sky a question; he is seen as a small pale figure with the wind lifting his hair. The sky fills more than half of the frame. At the lower left the dark sea runs to the horizon, with a thin pale band of light along it at the far left edge. In the foreground a few wet pebbles of the shingle are soft and out of focus. A steady sea wind bends the grass along the cliff edge and lifts his hair.
 
 Light: the clifftop at Seven Sisters, East Sussex, England, in the blue hour, twenty minutes after sunset. There is no sun and no visible light source in frame. The only light is the dusk sky itself, soft and low-key. The sky is a deep muted blue-grey with thin high cloud and lightens to a thin pale band along the horizon at the far left; the sea is dark slate, the cliffs pale grey-blue, and his shirt is a pale cool grey-white shape, dimmer than the pale band on the horizon and lit by the same dusk sky as everything else. White balance is neutral and colours are natural and unsaturated.
 
