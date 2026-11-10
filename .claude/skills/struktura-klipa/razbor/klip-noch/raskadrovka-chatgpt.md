@@ -190,9 +190,11 @@ Rendering: a candid documentary photograph on a full-frame camera, 85 mm lens, f
 ```
 A vertical photograph of the open sea toward the horizon in the last light of the blue hour, photographed with a long telephoto lens, so the space is compressed and flat.
 
-The dark sea fills the lower three quarters of the frame in long soft swells, almost black near the bottom and a little lighter toward the horizon. Along the horizon at the far left lies a thin pale band of fading light, the last trace of the sunset, soft at its edges. Above it the sky is a deep muted blue-grey, darkening toward the top of the frame. No sun, no clouds lit from below, no reflected path on the water, no ships and no birds.
+The dark sea fills the lower three quarters of the frame in long soft swells, almost black near the bottom and a little lighter toward the horizon. Along the horizon at the far left lies a thin pale band of fading light, the last trace of the sunset, soft at its edges. Above it the sky is a deep muted blue-grey, darkening toward the top of the frame. The horizon is an empty, clean line where the water meets the sky.
 
 Light: the blue hour, twenty minutes after sunset. The pale band is the only brighter thing in the frame, and the sea carries only a faint cool sheen. White balance is neutral and colours are natural and unsaturated.
+
+Realism: the scene is rendered as a real seascape photograph at a real scale. The swells are long and low with fine ripples on their surface, the far water softens into a gentle haze toward the horizon, and the pale band has a smooth, natural gradient into the sky, with no banding and no hard edges. The water close to the camera carries a faint cool sheen of the sky and no glitter. Tones are soft with a natural tonal range, and the finest detail is held on the swells in the middle of the frame.
 
 Rendering: a candid documentary photograph on a full-frame camera, 400 mm lens, f/5.6, ISO 1600, ungraded colour, smooth and quiet, a clean low-noise file.
 ```
