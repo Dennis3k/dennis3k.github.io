@@ -58,7 +58,7 @@ Rendering: a candid documentary photograph on a full-frame camera, 100 mm macro 
 
 ## КАДР 4 — средний, профиль
 
-**Приложить: 1) главный кадр героя, 2) картинка принта. Если профиль не держит лицо, запасной вариант: три четверти с другой высоты.**
+**Приложить: 1) главный кадр героя (обновлённый, с приглушённым принтом), 2) файл принта print-muted. Если профиль не держит лицо, запасной вариант: три четверти с другой высоты.**
 
 ```
 The man in the first attached image is the subject. Preserve his identity exactly. Do not redesign him, do not idealise him, do not beautify him, do not make him younger or older, do not make his face more symmetrical. Below, "the reference" means the first attached image.
@@ -197,7 +197,7 @@ Rendering: a candid documentary photograph on a full-frame camera, 400 mm lens, 
 
 ## КАДР 10 — начальный кадр отъезда, средний с высоты
 
-**Приложить: 1) утверждённый главный кадр героя, 2) картинка принта. Конец отъезда делает видеогенерация.**
+**Приложить: 1) главный кадр героя (обновлённый, с приглушённым принтом), 2) файл принта print-muted. Конец отъезда делает видеогенерация.**
 
 ```
 The man in the first attached image is the subject. Preserve his identity exactly. Do not redesign him, do not idealise him, do not beautify him, do not make him younger or older, do not make his face more symmetrical. Below, "the reference" means the first attached image.
