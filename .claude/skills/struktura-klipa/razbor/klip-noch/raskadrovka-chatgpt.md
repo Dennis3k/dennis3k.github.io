@@ -37,7 +37,7 @@ Wardrobe, small in the frame and as in the reference: an open cream linen shirt 
 
 Framing and pose, this is what changes from the reference: a wide vertical shot taken from above and from the side, the camera about three metres above his head and five metres to his right, looking down along the clifftop. He is a small figure, about one eighth of the frame height, seated in the grass at the edge of the chalk cliff in the right third of the frame, his torso toward the camera and his head turned toward the left of the frame, where the pale band of the horizon lies; one forearm rests on his raised knee. Below him the cliff edge falls away to a narrow shingle beach and a thin line of surf, and the chalk cliffs run off to the right in a long receding line. In the foreground a few dark shrubs and dry grass pass very close to the lens, soft and out of focus, giving the shot depth. A steady sea wind bends the grass and the shrubs and lifts his hair.
 
-Light: the clifftop at Seven Sisters, East Sussex, England, in the blue hour, twenty minutes after sunset. There is no sun and no visible light source in frame. The only light is the dusk sky itself, soft and low-key. The sea is dark slate, the sky a deep muted blue-grey that lightens to a thin pale band along the horizon at the far left, and the chalk cliffs are pale grey-blue. His white shirt is the lightest small shape in the frame. Colours are natural and unsaturated, with no orange or yellow anywhere.
+Light: the clifftop at Seven Sisters, East Sussex, England, in the blue hour, twenty minutes after sunset. There is no sun and no visible light source in frame. The only light is the dusk sky itself, soft and low-key. The sea is dark slate, the sky a deep muted blue-grey that lightens to a thin pale band along the horizon at the far left, and the chalk cliffs are pale grey-blue. His shirt is a pale cool grey-white shape, dimmer than the pale band on the horizon and lit by the same dusk sky as everything else. White balance is neutral and colours are natural and unsaturated.
 
 Rendering: a candid documentary photograph on a full-frame camera, 24 mm lens, f/5.6, ISO 800, the man and the cliff line in focus, the foreground shrubs soft, ungraded colour as it comes from the camera, a clean low-noise file.
 ```
@@ -51,7 +51,7 @@ A vertical macro photograph at the foot of a white chalk cliff, the camera low, 
 
 The wet base of the chalk wall rises out of the top of the frame. At its foot a dark band of water stain, above it the chalk is dry and pale grey-blue with fine horizontal veins and a little loose scree. A narrow shingle beach lies against the wall, the wet stones dark and glistening. A wave arrives at the foot of the wall and spreads over the shingle as lace-like foam with small bubbles; part of the foam is already sliding back and leaves a wet shining trail on the stones. The wall and the water at its foot fill the frame completely, and no horizon is visible.
 
-Light: the clifftop at Seven Sisters, East Sussex, England, in the blue hour, twenty minutes after sunset. There is no sun and no visible light source in frame. The only light is the soft dusk sky. The water close to the shore is dark grey-green, the foam is the lightest thing in the frame and reads clean grey-white, and the chalk wall is cool and pale. Colours are natural and unsaturated, with no orange or yellow anywhere.
+Light: the clifftop at Seven Sisters, East Sussex, England, in the blue hour, twenty minutes after sunset. There is no sun and no visible light source in frame. The only light is the soft dusk sky. The water close to the shore is dark grey-green, the foam is the lightest thing in the frame and reads clean grey-white, and the chalk wall is cool and pale. White balance is neutral and colours are natural and unsaturated.
 
 Rendering: a candid documentary photograph on a full-frame camera, 100 mm macro lens, f/4, ISO 800, shallow depth of field with the foam in the foreground sharp and the far water softly blurred, ungraded colour, a clean low-noise file.
 ```
@@ -96,7 +96,7 @@ A vertical photograph of a single seagull gliding over the sea in the blue hour,
 
 The gull is small in the frame, in the right third, caught in a smooth glide with its wings spread wide and level, its head turned slightly toward the left of the frame. It is the only bird in the frame. Below it lies dark slate water with long soft swells; the sky above is a deep muted blue-grey that lightens to a thin pale band along the horizon at the far left.
 
-Light: the clifftop at Seven Sisters, East Sussex, England, in the blue hour, twenty minutes after sunset. There is no sun and no visible light source in frame. The only light is the soft dusk sky. The gull is pale grey and white against the darker sky, with clean readable wing feathers. Colours are natural and unsaturated, with no orange or yellow anywhere.
+Light: the clifftop at Seven Sisters, East Sussex, England, in the blue hour, twenty minutes after sunset. There is no sun and no visible light source in frame. The only light is the soft dusk sky. The gull is pale grey and white against the darker sky, with clean readable wing feathers. White balance is neutral and colours are natural and unsaturated.
 
 Rendering: a candid documentary photograph on a full-frame camera, 300 mm lens, f/5.6, ISO 800, the gull sharp, the water and the sky smooth, ungraded colour, a clean low-noise file.
 ```
@@ -118,7 +118,7 @@ Wardrobe, small in the frame and as in the reference: an open cream linen shirt 
 
 Framing and pose, this is what changes from the reference: a very wide vertical shot, the camera low and at the height of his eyes, far from him. He is a small figure, about one tenth of the frame height, seated in the grass at the edge of the chalk cliff in the left third of the frame, his torso toward the camera, his face lifted and tilted up toward the sky, chin raised, as if asking the sky a question. The sky fills more than half of the frame. Below it the sea lies dark and flat, and the chalk cliffs run away to the right as a pale receding line. A steady sea wind bends the grass and lifts his hair.
 
-Light: the clifftop at Seven Sisters, East Sussex, England, in the blue hour, twenty minutes after sunset. There is no sun and no visible light source in frame. The only light is the dusk sky itself, soft and low-key. The sky is a deep muted blue-grey with thin high cloud and lightens to a thin pale band along the horizon at the far left; the sea is dark slate, the cliffs pale grey-blue, and his white shirt is the lightest small shape in the frame. Colours are natural and unsaturated, with no orange or yellow anywhere.
+Light: the clifftop at Seven Sisters, East Sussex, England, in the blue hour, twenty minutes after sunset. There is no sun and no visible light source in frame. The only light is the dusk sky itself, soft and low-key. The sky is a deep muted blue-grey with thin high cloud and lightens to a thin pale band along the horizon at the far left; the sea is dark slate, the cliffs pale grey-blue, and his white shirt is the lightest small shape in the frame. White balance is neutral and colours are natural and unsaturated.
 
 Rendering: a candid documentary photograph on a full-frame camera, 35 mm lens, f/5.6, ISO 800, everything in focus, ungraded colour as it comes from the camera, a clean low-noise file.
 ```
@@ -190,7 +190,7 @@ A vertical photograph of the open sea toward the horizon in the last light of th
 
 The dark sea fills the lower three quarters of the frame in long soft swells, almost black near the bottom and a little lighter toward the horizon. Along the horizon at the far left lies a thin pale band of fading light, the last trace of the sunset, soft at its edges. Above it the sky is a deep muted blue-grey, darkening toward the top of the frame. No sun, no clouds lit from below, no reflected path on the water, no ships and no birds.
 
-Light: the blue hour, twenty minutes after sunset. The pale band is the only brighter thing in the frame, and the sea carries only a faint cool sheen. Colours are natural and unsaturated, with no orange or yellow anywhere.
+Light: the blue hour, twenty minutes after sunset. The pale band is the only brighter thing in the frame, and the sea carries only a faint cool sheen. White balance is neutral and colours are natural and unsaturated.
 
 Rendering: a candid documentary photograph on a full-frame camera, 400 mm lens, f/5.6, ISO 1600, ungraded colour, smooth and quiet, a clean low-noise file.
 ```
