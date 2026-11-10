@@ -140,7 +140,10 @@ def main():
     ap.add_argument("--title", required=True)
     ap.add_argument("--sub", default="")
     ap.add_argument("--meta", default="", help="подзаголовок титула, можно <br>")
+    ap.add_argument("--pre-pt", default="7.0",
+                    help="кегль блоков кода; для длинных промтов с полным замком личности 6.2")
     a = ap.parse_args()
+    css = CSS.replace("font-size: 7.0pt;", f"font-size: {a.pre_pt}pt;")
     src, dst, title, sub, meta = a.markdown, a.out, a.title, a.sub, a.meta
     body = convert(open(src, encoding="utf-8").read())
     body = re.sub(r'^<h1>.*?</h1>\n?', '', body, count=1)
@@ -153,7 +156,7 @@ def main():
     js = os.path.join(tmp, "render.js")
     open(page, "w", encoding="utf-8").write(
         f'<!doctype html><html lang="ru"><head><meta charset="utf-8">'
-        f'<title>{html.escape(title)}</title><style>{CSS}</style></head>'
+        f'<title>{html.escape(title)}</title><style>{css}</style></head>'
         f'<body>{cover}{body}</body></html>')
     open(js, "w", encoding="utf-8").write(RENDER)
     foot = f"{title} · {sub}" if sub else title
