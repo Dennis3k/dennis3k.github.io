@@ -227,3 +227,19 @@ Hair: all the hair, on his head and in his beard, is brown to sun-bleached golde
 
 Rendering: a candid documentary photograph on a full-frame camera, 50 mm lens, f/2.8, ISO 800, 1/125 second, a clean low-noise file, ungraded colour as it comes from the camera. Fine detail is strongest at the eyes; the shirt, the grass and the background are rendered softer and calmer than the face. The skin is that of a clean unretouched photograph: tone changes softly across the large planes of the forehead, cheeks and neck, fine pores are visible only on the nose and cheeks where the light catches them, expression lines appear only where the face really creases, and the rest of the surface is continuous and calm, without an all-over network of tiny wrinkles.
 ```
+
+## КАДР 11 — небо со звёздами и луной (финал, по согласованию с заказчицей)
+
+**Приложить: ничего. Героя в кадре нет.**
+
+```
+A vertical photograph of the night sky after the end of twilight, photographed from the clifftop at Seven Sisters, East Sussex, England, looking out over the sea.
+
+The sky fills about three quarters of the frame. It is a deep blue-black near the top and lightens gradually downward to a dark muted blue. Low at the far left, just above the faded trace of the sunset along the horizon, hangs a thin waxing crescent moon with a soft clean edge and a faint glow of earthshine on its dark part. In the upper sky a few stars show, faint and small, of different brightness, a handful brighter than the rest and many barely visible, scattered unevenly. At the bottom of the frame the dark sea lies in long calm swells under the last faint pale line on the horizon at the left, and at the lower right the black silhouette of the clifftop with a few blades of grass against the sky.
+
+Light: the sea at Seven Sisters in the first hour of night. The only light is the sky, the moon and the last faint trace of the sunset at the far left; the moon is thin and gives almost no light on the landscape. White balance is neutral and the colours are natural and deeply muted.
+
+Realism: the scene is rendered as a real night photograph at a real scale. The stars are small points of light with natural differences in brightness and a gentle falloff, not a dense even scatter, and the moon is a thin crescent with a believable soft edge. The sky has a smooth tonal gradient with no banding. The sea is calm, with faint cool sheen on the swells and no glitter. Tones are soft with a natural tonal range, and the finest detail is held on the stars and the crescent.
+
+Rendering: a candid documentary photograph on a full-frame camera, 35 mm lens, f/2, ISO 3200, a four-second exposure on a tripod, the stars and the horizon sharp, ungraded colour as it comes from the camera, a clean low-noise file.
+```
