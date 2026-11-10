@@ -101,9 +101,9 @@ Light: the clifftop at Seven Sisters, East Sussex, England, in the blue hour, tw
 Rendering: a candid documentary photograph on a full-frame camera, 300 mm lens, f/5.6, ISO 800, the gull sharp, the water and the sky smooth, ungraded colour, a clean low-noise file.
 ```
 
-## КАДР 6 — широкий-средний, во весь рост, камера низко (12 секунд)
+## КАДР 6 — дальний, вдоль берега, лицо к небу (12 секунд)
 
-**Приложить: один файл, кадр 4 (профиль по пояс) как референс.**
+**Приложить: один файл, кадр вдоль берега (герой справа, мел уходит вдаль) как референс.**
 
 ```
 The man in the first attached image is the subject. Preserve his identity exactly. Do not redesign him, do not idealise him, do not beautify him, do not make him younger or older, do not make his face more symmetrical. Below, "the reference" means the first attached image.
@@ -116,13 +116,13 @@ Invent nothing about the face, the hair or the build.
 
 Wardrobe, all of it visible and as in the reference: an open cream linen shirt with the sleeves pushed up over a cream cotton t-shirt with the printed design on its chest exactly as it appears in the reference, loose muted grey-brown linen trousers, and the wooden beads at his neck. His feet are hidden in the grass and out of frame.
 
-Framing and pose, this is what changes from the reference: a wide-medium vertical shot showing him full length, seated: the camera low in the grass about six metres from him, at the height of his knees, looking slightly up at him from his front left, so that we see him from the side and a little from the front. His whole seated figure fills about one third of the frame height, set in the right third of the frame. He sits on a grassy slope well back from the edge of the chalk cliff, with several metres of open grass between him and the drop. His face is lifted toward the sky, chin raised, as if asking the sky a question; one forearm rests on his raised knee, the hand relaxed, and the other hand rests on the grass. The sky fills the upper half of the frame. Behind him the chalk cliffs run away along the coast as a pale receding line and the dark sea lies below them, with a thin pale band of light along the horizon at the far left. In the foreground tall dry grass is soft and out of focus. A steady sea wind bends the grass and lifts his hair.
+Framing and pose, this is what changes from the reference: the same view, the same place and the same distance as the reference, with the camera low and above the grass looking along the coast. He is a small seated figure in the right third of the frame, about one seventh of the frame height, and the long chalk cliffs run away to the right as a pale receding line while the dark sea lies to the left, with a thin pale band of light along the horizon at the far left. What changes is his head and the ground under him. His face is lifted toward the sky, chin raised, as if asking the sky a question; one forearm rests on his raised knee, the hand relaxed, and the other hand rests on the grass. He sits on a level, flat grassy shelf, not on a slope: around him the ground is flat and open, a few low gorse bushes grow in a loose line between him and the cliff edge, and the cliff edge is a clear distance beyond them, so that the place feels calm and safe. The sky fills about half of the frame. In the foreground tall dry grass is soft and out of focus. A steady sea wind bends the grass and lifts his hair.
 
 Light: the clifftop at Seven Sisters, East Sussex, England, in the blue hour, twenty minutes after sunset. There is no sun and no visible light source in frame. The only light is the dusk sky itself, soft and low-key. The sky is a deep muted blue-grey with thin high cloud and lightens to a thin pale band along the horizon at the far left; the sea is dark slate, the cliffs pale grey-blue, and his shirt is a pale cool grey-white shape, dimmer than the pale band on the horizon and lit by the same dusk sky as everything else. White balance is neutral and colours are natural and unsaturated.
 
 Realism: the scene is rendered as a real landscape photograph at a real scale. The figure has natural proportions for his size at this distance, with the weight of his body pressing slightly into the grass and a soft contact shadow beneath him. The grass is made of individual blades, bent by the wind at different angles. The chalk cliffs show their real horizontal strata and weathered vertical grooves, and they fade with distance into a gentle atmospheric haze. The sea is dark and calm, with long soft swells and fine ripples on their surface. Tones are soft with a natural tonal range, and the finest detail is held at the figure and at the cliff edge.
 
-Rendering: a candid documentary photograph on a full-frame camera, 50 mm lens, f/5.6, ISO 800, the man and the cliffs in focus and the tall grass in the foreground soft, ungraded colour as it comes from the camera, a clean low-noise file.
+Rendering: a candid documentary photograph on a full-frame camera, 35 mm lens, f/5.6, ISO 800, the man and the cliffs in focus and the tall grass in the foreground soft, ungraded colour as it comes from the camera, a clean low-noise file.
 ```
 
 ## КАДР 7 — средний, снизу вверх
